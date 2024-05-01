@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 import CreateTask from "./components/CreateTask";
 import Calendar from "./components/Calendar";
+import Login from "./components/Login";
 
 
 function App() {
@@ -18,6 +19,8 @@ function App() {
           <Route name="navbar" path="/:id" element={<Navbar />} />
           <Route name="createTask" path="/create/*" element={<CreateTask />} />
           <Route name="calendar" path="/calendar/*" element={<Calendar />}/>
+          <Route name="login" path="/login/*" element={<Login />} />
+          
        
         </Routes>
       </BrowserRouter>
