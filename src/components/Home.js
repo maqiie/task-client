@@ -7,6 +7,7 @@ const Home = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [task, setTask] = useState(null);
+  const userName = "Timothy";
 
   // Generate days of the month
   const daysInMonth = new Date(
@@ -92,17 +93,18 @@ const Home = () => {
           </div>
         </div>
 
-        <h1 className="text-2xl md:text-3xl font-semibold mb-4 text-center">
-          Welcome to Your Task App
+        <h1 className="text-3xl md:text-4xl font-semibold mb-6 text-center text-gray-800">
+          Welcome, {userName}!
         </h1>
-        <p className="text-gray-700 text-sm md:text-base mb-6 text-center">
-          Get organized and stay productive!
+
+        <p className="text-gray-600 text-lg md:text-xl mb-8 text-center">
+          Stay organized and boost your productivity!
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 transition duration-300 w-full">
+          <button className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 transition duration-300 block w-full">
             Create Task
           </button>
-          <button className="bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 transition duration-300 w-full">
+          <button className="bg-gray-700 hover:bg-gray-800 text-white py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-opacity-50 transition duration-300 block w-full">
             View Tasks
           </button>
         </div>
@@ -134,69 +136,81 @@ const Home = () => {
 
           {/* Popup for task details */}
           {showPopup && selectedTask && (
-  <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center">
-    <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 backdrop-filter backdrop-blur-lg"></div>
-    <div className="bg-white rounded-lg p-8 w-96 relative z-10">
-      <h3 className="text-lg font-semibold mb-4">{selectedTask.title}</h3>
-      <p className="text-gray-500 text-sm mb-2">Due: {selectedTask.dueDate}</p>
-      <p className="text-gray-500 text-sm mb-2">Time: {selectedTask.time}</p>
-      <p className="text-gray-500 text-sm mb-4">Location: {selectedTask.location}</p>
-      <p className="text-gray-700 mb-4">{selectedTask.description}</p>
-      {/* Additional details */}
-      <div className="flex justify-between">
-        {/* Icons for actions */}
-        <div className="flex items-center">
-          <svg
-            onClick={handleClosePopup}
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 cursor-pointer text-gray-500 hover:text-gray-700 mr-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-          <span className="text-gray-500 text-sm">Close</span>
-        </div>
-        <div className="flex items-center">
-          <svg
-            onClick={handleDeleteClick}
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 cursor-pointer text-red-500 hover:text-red-700 mr-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-          <span className="text-red-500 text-sm">Delete</span>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
+            <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center">
+              <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 backdrop-filter backdrop-blur-lg"></div>
+              <div className="bg-white rounded-lg p-8 w-96 relative z-10">
+                <h3 className="text-lg font-semibold mb-4">
+                  {selectedTask.title}
+                </h3>
+                <p className="text-gray-500 text-sm mb-2">
+                  Due: {selectedTask.dueDate}
+                </p>
+                <p className="text-gray-500 text-sm mb-2">
+                  Time: {selectedTask.time}
+                </p>
+                <p className="text-gray-500 text-sm mb-4">
+                  Location: {selectedTask.location}
+                </p>
+                <p className="text-gray-700 mb-4">{selectedTask.description}</p>
+                {/* Additional details */}
+                <div className="flex justify-between">
+                  {/* Icons for actions */}
+                  <div className="flex items-center">
+                    <svg
+                      onClick={handleClosePopup}
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 cursor-pointer text-gray-500 hover:text-gray-700 mr-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    <span className="text-gray-500 text-sm">Close</span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg
+                      onClick={handleDeleteClick}
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 cursor-pointer text-red-500 hover:text-red-700 mr-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    <span className="text-red-500 text-sm">Delete</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Calendar</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">
+            Calendar
+          </h2>
           {/* Calendar */}
-          <div className="bg-gray-200 rounded-lg p-4">
-            <div className="grid grid-cols-7 gap-1">
+          <div className="bg-white rounded-lg p-4 shadow-md">
+            <div className="grid grid-cols-7 gap-2">
               {/* Render days of the week */}
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
                 (day, index) => (
-                  <div key={index} className="text-center font-semibold">
+                  <div
+                    key={index}
+                    className="text-center text-gray-600 font-semibold text-sm"
+                  >
                     {day}
                   </div>
                 )
@@ -205,42 +219,60 @@ const Home = () => {
               {daysArray.map((day, index) => (
                 <div
                   key={index}
-                  className={`text-center py-2 rounded-lg ${
-                    day === currentDay ? "bg-blue-500 text-white" : ""
-                  } ${day === selectedDay ? "bg-yellow-500" : ""}`}
+                  className={`flex justify-center items-center rounded-full cursor-pointer
+            ${day === currentDay ? "bg-blue-500 text-white" : ""}
+            ${
+              day === selectedDay
+                ? "bg-yellow-500 text-gray-800"
+                : "hover:bg-gray-100"
+            }
+          `}
                   onClick={() => setSelectedDay(day)}
                 >
-                  {day}
+                  <span className={`${day === currentDay ? "text-white" : ""}`}>
+                    {day}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
+
           {/* Display tasks for the selected day */}
           {tasks[selectedDay] ? (
             <div className="mt-4">
               <h2 className="text-xl font-semibold mb-4">
-                Tasks for {currentDate.getMonth() + 1}/{selectedDay}/2024
+                Tasks for{" "}
+                {currentDate.toLocaleDateString("en-US", {
+                  month: "numeric",
+                  day: "numeric",
+                  year: "numeric",
+                })}
               </h2>
-              <ul className="space-y-2">
+              <ul className="space-y-4">
                 {/* Display tasks for the selected day */}
                 {tasks[selectedDay].map((task, index) => (
                   <li
                     key={index}
-                    className={`flex items-center justify-between rounded-lg px-4 py-2 ${
-                      selectedDay === currentDay ? "bg-blue-100" : "bg-gray-200"
-                    }`}
+                    className={`flex items-center justify-between rounded-lg px-4 py-3 ${
+                      selectedDay === currentDay ? "bg-blue-100" : "bg-gray-100"
+                    } shadow-md hover:shadow-lg`}
                   >
                     <span
                       className={`${
                         selectedDay === currentDay
                           ? "text-blue-600"
                           : "text-gray-700"
-                      }`}
+                      } font-semibold`}
                     >
                       {task}
                     </span>
                     <span className="text-gray-500 text-xs">
-                      Due: {currentDate.getMonth() + 1}/{selectedDay}/2024
+                      Due:{" "}
+                      {currentDate.toLocaleDateString("en-US", {
+                        month: "numeric",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </span>
                   </li>
                 ))}
