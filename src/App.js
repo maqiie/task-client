@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import CreateTask from "./components/CreateTask";
 import Calendar from "./components/Calendar";
 import Login from "./components/Login";
+import Task from "./components/Task";
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route name="createTask" path="/create/*" element={<CreateTask />} />
           <Route name="calendar" path="/calendar/*" element={<Calendar />}/>
           <Route name="login" path="/login/*" element={<Login />} />
+          <Route name="task" path="/tasks" element={<Task />} />
           
        
         </Routes>

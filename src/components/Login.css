@@ -1,107 +1,91 @@
+/* Login.css */
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Ensure body and html take up the full height of the viewport */
+}
+
 .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Use 100% of the viewport height */
-  }
-  
-  .card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 40px;
-    width: 80%; /* Set width to 80% on large screens */
-    max-width: 400px; /* Add max-width for responsiveness */
-    transition: box-shadow 0.3s ease;
-  }
-  
-  .card:hover {
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
-  }
-  
-  .switch {
-    color: #555;
-    cursor: pointer;
-    font-size: 14px;
-    margin-bottom: 20px; /* Move margin to bottom */
-    text-align: center;
-    text-transform: uppercase;
-    transition: color 0.3s ease;
-  }
-  
-  .switch:hover {
-    color: #333;
-  }
-  
-  .inputBox,
-  .inputBox1 {
-    margin-bottom: 20px;
-    position: relative;
-    width: 100%;
-  }
-  
-  .inputBox input,
-  .inputBox1 input {
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 14px;
-    padding: 12px;
-    width: 100%;
-    transition: border-color 0.3s ease, color 0.3s ease;
-    color: #333;
-  }
-  
-  .inputBox input:focus,
-  .inputBox1 input:focus {
-    border-color: #555;
-  }
-  
-  .inputBox span,
-  .inputBox1 span {
-    color: #888;
-    font-size: 14px;
-    left: 12px;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: color 0.3s ease, transform 0.3s ease;
-  }
-  
-  .inputBox input:focus ~ span,
-  .inputBox input:valid ~ span,
-  .inputBox1 input:focus ~ span,
-  .inputBox1 input:valid ~ span {
-    color: #555;
-    transform: translateY(-120%) scale(0.8);
-  }
-  
-  .enter {
-    background-color: #555;
-    border: none;
-    border-radius: 5px;
-    color: #fff;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 20px;
-    padding: 12px 20px;
-    text-transform: uppercase;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    width: 100%;
-  }
-  
-  .enter:hover {
-    background-color: #333;
-  }
-  
-  @media (max-width: 768px) {
-    .card2 {
-      padding: 20px; /* Adjust padding on small screens */
-    }
-  
-    .enter {
-      margin-top: 10px; /* Reduce margin on small screens */
-    }
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Set the minimum height of the container to 100% of the viewport height */
+  width: 100%; /* Ensure the container spans the entire width of its parent */
+  background: linear-gradient(to bottom right, indigo, purple); /* Gradient background from indigo to purple */
+}
+
+.card {
+  width: 90%; /* Set the card width to 90% of its container */
+  max-width: 400px; /* Limit the maximum width of the card */
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+}
+
+/* Rest of your CSS styles */
+
+/* Rest of your CSS styles */
+
+
+.switch {
+  text-decoration: none;
+  color: indigo; /* Set the switch text color to indigo */
+  cursor: pointer;
+  display: block;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.signup-text {
+  color: purple; /* Set the sign up text color to purple */
+}
+
+.inputBox {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  outline: none;
+  font-size: 16px;
+  color: #333;
+  background: transparent;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-bottom: 2px solid purple; /* Set the border color on focus to purple */
+}
+
+.user {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #666;
+  transition: 0.5s;
+}
+
+.enter {
+  width: 100%;
+  background-color: indigo; /* Set the button background color to indigo */
+  color: #fff;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 18px;
+  transition: background-color 0.3s;
+}
+
+.enter:hover {
+  background-color: purple; /* Change button background color on hover to purple */
+}
