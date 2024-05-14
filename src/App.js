@@ -8,7 +8,7 @@ import CreateTask from "./components/CreateTask";
 import Calendar from "./components/Calendar";
 import Login from "./components/Login";
 import Task from "./components/Task";
-
+import SpecialEvents from "./components/SpecialEvents";
 
 function App() {
   return (
@@ -22,6 +22,7 @@ function App() {
           <Route name="calendar" path="/calendar/*" element={<Calendar />}/>
           <Route name="login" path="/login/*" element={<Login />} />
           <Route name="task" path="/tasks" element={<Task />} />
+          <Route name="specialEvent" path="/special" element={<SpecialEvents/>}/>
           
        
         </Routes>

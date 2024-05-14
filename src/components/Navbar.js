@@ -56,6 +56,9 @@ const Navbar = () => {
                 <Link to="/calendar" className="text-white transition duration-300 py-2 px-4 rounded-md hover:bg-indigo-700" onClick={closeMenu}>Calendar</Link>
               </li>
               <li>
+                <Link to="/Special" className="text-white transition duration-300 py-2 px-4 rounded-md hover:bg-indigo-700" onClick={closeMenu}>Special Events</Link>
+              </li>
+              <li>
                 <a href="/tasks" className="text-white transition duration-300 py-2 px-4 rounded-md hover:bg-indigo-700" onClick={closeMenu}>Tasks</a>
               </li>
               {/* Add Login link or icon */}
