@@ -1,9 +1,9 @@
-
 import React, { useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,7 +17,14 @@ const Login = () => {
     loading: false,
   });
 
-  const { isSignUp, usernameOrEmail, name, password, confirmPassword, loading } = formData;
+  const {
+    isSignUp,
+    usernameOrEmail,
+    name,
+    password,
+    confirmPassword,
+    loading,
+  } = formData;
 
   const handleSwitchClick = () => {
     setFormData({ ...formData, isSignUp: !isSignUp });
@@ -27,15 +34,21 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // const handleLoginSuccess = () => {
+  //   toast.success("Login successful!");
+  //   setTimeout(() => {
+  //     navigate("/");
+  //     refreshPage();
+  //   }, 1000);
+  // };
   const handleLoginSuccess = () => {
     toast.success("Login successful!");
     setTimeout(() => {
-      navigate("/");
-      refreshPage();
+      navigate("/profile");
     }, 1000);
   };
+  
 
- 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -45,7 +58,6 @@ const Login = () => {
       console.error("Error with login request:", error);
     }
   };
-  
 
   const refreshPage = () => {
     window.location.reload(false);
@@ -55,13 +67,13 @@ const Login = () => {
     try {
       // Set loading to true
       setFormData({ ...formData, loading: true });
-  
+
       // Make login request
       const response = await axios.post("http://localhost:3001/auth/sign_in", {
         email: usernameOrEmail,
         password,
       });
-  
+
       // Check response status
       if (response.status === 200) {
         const authTokenHeader = response.headers["authorization"];
@@ -70,6 +82,8 @@ const Login = () => {
           const authToken = authTokenHeader.split("Bearer ")[1];
           localStorage.setItem("authToken", authToken);
           // Optionally handle successful login here
+          handleLoginSuccess();
+
         } else {
           throw new Error("Authorization token not found in response");
         }
@@ -84,8 +98,12 @@ const Login = () => {
       } else if (error.response) {
         toast.error("An unexpected error occurred. Please try again later.");
       } else if (error.request) {
-        console.error("No response from server. Please check your internet connection.");
-        toast.error("No response from server. Please check your internet connection.");
+        console.error(
+          "No response from server. Please check your internet connection."
+        );
+        toast.error(
+          "No response from server. Please check your internet connection."
+        );
       } else {
         console.error("An unexpected error occurred. Please try again later.");
         toast.error("An unexpected error occurred. Please try again later.");
@@ -95,15 +113,11 @@ const Login = () => {
       setFormData({ ...formData, loading: false });
     }
   };
-  
-  
-  
-  
- 
+
   const registerRequest = async () => {
     try {
       setFormData({ ...formData, loading: true });
-  
+
       const response = await axios.post("http://localhost:3001/auth", {
         user: {
           name,
@@ -112,10 +126,14 @@ const Login = () => {
           password_confirmation: confirmPassword,
         },
       });
-  
+
       console.log("Registration response:", response); // Log the response object
-  
-      if ((response.status === 201 || response.status === 200) && response.data && response.data.status === "success") {
+
+      if (
+        (response.status === 201 || response.status === 200) &&
+        response.data &&
+        response.data.status === "success"
+      ) {
         console.log("Registration successful:", response.data); // Log the response data
         toast.success("User created successfully! Please login");
       } else {
@@ -128,13 +146,18 @@ const Login = () => {
       setFormData({ ...formData, loading: false });
     }
   };
-  
 
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="bg-white p-8 rounded shadow-md">
-        <a className="block text-center mb-4 text-blue-500" onClick={handleSwitchClick}>
-          Switch to <span className={isSignUp ? "text-purple-500" : "text-blue-500"}>{isSignUp ? "Login" : "Sign Up"}</span>
+        <a
+          className="block text-center mb-4 text-blue-500"
+          onClick={handleSwitchClick}
+        >
+          Switch to{" "}
+          <span className={isSignUp ? "text-purple-500" : "text-blue-500"}>
+            {isSignUp ? "Login" : "Sign Up"}
+          </span>
         </a>
 
         <form onSubmit={handleFormSubmit}>
@@ -206,7 +229,6 @@ const Login = () => {
 };
 
 export default Login;
-
 
 // import React, { useState } from "react";
 // import axios from "axios";

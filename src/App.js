@@ -126,7 +126,7 @@ function App() {
         <Route path="/login/*" element={<Login />} />
         <Route path="/tasks" element={currentUser ? <Task /> : <Navigate to="/login" />} />
         <Route path="/special" element={<SpecialEvents />} />
-        <Route path="/profile" element={currentUser ? <UserProfile /> : <Navigate to="/login" />} />
+        <Route path="/profile" element={<UserProfile userData={currentUser} />} />
       </Routes>
     </Router>
   );
