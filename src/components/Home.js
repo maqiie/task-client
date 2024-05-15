@@ -11,7 +11,7 @@ const Home = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [task, setTask] = useState(null);
-  const userName = "Timothy";
+  const userName = "User";
   // Initialize selected day with the current day
   const [selectedDay, setSelectedDay] = useState(currentDate);
   const [specialEvents, setSpecialEvents] = useState([]);
