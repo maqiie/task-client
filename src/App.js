@@ -57,7 +57,7 @@ function App() {
     <Router>
       <Navbar currentUser={currentUser} onLogout={handleLogout} />
       <Routes>
-        <Route path="/" element={<Home />} />
+      <Route path="/" element={<Home currentUser={currentUser} />} />
         <Route path="/create/*" element={currentUser ? <CreateTask /> : <Navigate to="/login" />} />
         <Route path="/calendar/*" element={<Calendar />} />
         <Route path="/login/*" element={<Login />} />
