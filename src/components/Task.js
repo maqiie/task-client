@@ -258,10 +258,17 @@ class Task extends Component {
     this.setState({ search: event.target.value });
   };
 
+  // handleDateSearch = (event) => {
+  //   const searchDate = new Date(event.target.value);
+  //   this.setState({ search: searchDate.toDateString() });
+  // };
   handleDateSearch = (event) => {
-    const searchDate = new Date(event.target.value);
-    this.setState({ search: searchDate.toDateString() });
+    const searchDate = new Date(event.target.value); // Convert input value to Date object
+    const formattedSearchDate = searchDate.toDateString(); // Format the Date object to string
+  
+    this.setState({ search: formattedSearchDate }); // Update the search state
   };
+  
 
   handleTaskClick = (task) => {
     this.setState({
@@ -311,11 +318,13 @@ class Task extends Component {
     const { search, tasks, activeTask, isPopupOpen, editedTask } = this.state;
 
     // Filter tasks based on search input
-    const filteredTasks = tasks.filter(
-      (task) =>
-        task.title.toLowerCase().includes(search.toLowerCase()) ||
-        task.priority.toLowerCase().includes(search.toLowerCase())
-    );
+   // Filter tasks based on search input
+const filteredTasks = tasks.filter(
+  (task) =>
+    task.title.toLowerCase().includes(search.toLowerCase()) ||
+    task.priority.toLowerCase().includes(search.toLowerCase()) ||
+    new Date(task.due_date).toDateString() === search // Compare with formatted due date
+);
 
     return (
       <div className="max-w-lg mx-auto bg-gray-100 rounded-lg shadow-md overflow-hidden">
