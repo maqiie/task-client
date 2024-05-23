@@ -14,6 +14,15 @@ import UserProfile from "./components/UserProfile";
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const timezone = "Africa/Nairobi"; // Example timezone - replace with your desired timezone
+
+  // Set the timezone for all Date objects
+Date.prototype.toLocaleString = function () {
+  return new Intl.DateTimeFormat(undefined, {
+    timeZone: timezone,
+    /* other options */
+  }).format(this);
+};
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -71,58 +80,3 @@ function App() {
 
 export default App;
 
-
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-// import "./App.css";
-// import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-// import Home from "./components/Home";
-// import Navbar from "./components/Navbar";
-// import CreateTask from "./components/CreateTask";
-// import Calendar from "./components/Calendar";
-// import Login from "./components/Login";
-// import Task from "./components/Task";
-// import SpecialEvents from "./components/SpecialEvents";
-
-// function App() {
-//   const [currentUser, setCurrentUser] = useState(null);
-
-//   useEffect(() => {
-//     const fetchUserData = async () => {
-//       try {
-//         const response = await axios.get(
-//           "http://localhost:3001/auth/validate_token"
-//         );
-//         const userData = response.data.data;
-//         setCurrentUser(userData);
-//       } catch (error) {
-//         console.error("Error fetching user data:", error);
-//       }
-//     };
-
-//     const storedToken = localStorage.getItem("authToken");
-//     const isLoggedIn = !!storedToken;
-
-//     if (isLoggedIn) {
-//       fetchUserData();
-//     }
-//   }, []);
-
-//   return (
-//     <div>
-//       <Router>
-//         <Navbar />
-//         <Routes>
-//           <Route path="/" element={<Home />} />
-//           <Route path="/create/*" element={<CreateTask />} />
-//           <Route path="/calendar/*" element={<Calendar />} />
-//           <Route path="/login/*" element={<Login />} />
-//           <Route path="/tasks" element={<Task />} />
-//           <Route path="/special" element={<SpecialEvents />} />
-//         </Routes>
-//       </Router>
-//     </div>
-//   );
-// }
-
-// export default App;
