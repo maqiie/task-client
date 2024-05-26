@@ -820,13 +820,13 @@
 //     return () => clearInterval(interval);
 //   }, [tasks, localCurrentDate]);
 
-//   useEffect(() => {
-//     const interval = setInterval(() => {
-//       setSelectedDay(new Date());
-//     }, 1000);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setSelectedDay(new Date());
+  //   }, 1000);
 
-//     return () => clearInterval(interval);
-//   }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
 //   const calculateEndTime = (dueDate, duration) => {
 //     const [start, end] = duration.split("-").map((time) => {
 //       const [hours, minutes] = time.split(":").map(Number);
@@ -925,7 +925,7 @@
 //       console.error("Error completing task:", error);
 //     }
 //   };
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -941,31 +941,40 @@ const Home = ({ currentUser }) => {
   const [upcomingTask, setUpcomingTask] = useState(null);
   const [currentTask, setCurrentTask] = useState(null);
   const [selectedDay, setSelectedDay] = useState(new Date());
-  const currentDate = new Date(); // This gets the current date and time in UTC
 
+  const currentDate = new Date(); // This gets the current date and time in UTC
   const localCurrentDate = new Date(
     currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
   ); // This converts the UTC time to local time
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const authToken = localStorage.getItem("authToken");
-      try {
-        const response = await axios.get("http://localhost:3001/reminders", {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            Accept: "application/json",
-          },
-        });
-        setTasks(response.data);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      }
-    };
-
-    fetchTasks();
+  const fetchTasks = useCallback(async () => {
+    const authToken = localStorage.getItem("authToken");
+    try {
+      const response = await axios.get("http://localhost:3001/reminders", {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          Accept: "application/json",
+        },
+      });
+      setTasks(response.data);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSelectedDay(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
   const calculateEndTime = (dueDate, duration) => {
     if (!duration) {
       return dueDate; // Return dueDate if duration is null
@@ -977,7 +986,7 @@ const Home = ({ currentUser }) => {
     return endTime;
   };
 
-  const updateTasks = () => {
+  const updateTasks = useCallback(() => {
     const now = new Date();
     console.log("Updating tasks at", now);
 
@@ -1008,13 +1017,13 @@ const Home = ({ currentUser }) => {
 
     console.log("Current task:", currentTask);
     console.log("Upcoming task:", upcomingTask);
-  };
+  }, [tasks, currentTask, upcomingTask]);
 
   useEffect(() => {
     updateTasks();
     const interval = setInterval(updateTasks, 60000); // Update every minute
     return () => clearInterval(interval);
-  }, [tasks]);
+  }, [tasks, updateTasks]);
 
   const calculateTimeUntil = (dueDate) => {
     const diff = new Date(dueDate) - new Date();
@@ -1025,6 +1034,7 @@ const Home = ({ currentUser }) => {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
   };
+
   const calculateTimeRemaining = (endTime) => {
     const now = new Date();
     const diff = endTime - now;
@@ -1039,9 +1049,9 @@ const Home = ({ currentUser }) => {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
     return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
-  };
+};
 
-  // Usage
+
   if (currentTask) {
     const endTime = calculateEndTime(
       new Date(currentTask.due_date),
@@ -1051,15 +1061,6 @@ const Home = ({ currentUser }) => {
     console.log("Time remaining for current task:", timeRemaining);
   }
 
-  // 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      updateTasks();
-    }, 1000); // Update every second
-
-    // Clear the interval on component unmount
-    return () => clearInterval(interval);
-  }, []); // Run once on component mount
   const handleCompleteTask = async (taskId) => {
     try {
       await axios.put(`/tasks/${taskId}`, { completed: true });
@@ -1113,62 +1114,70 @@ const Home = ({ currentUser }) => {
     // <div className="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
     <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
       <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
-        {currentTask ? (
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-4">
-            <h2 className="text-lg font-semibold mb-2">Current Task</h2>
-            <div className="flex items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-10 w-10 text-yellow-400 mr-2"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <circle
-                  cx="10"
-                  cy="10"
-                  r="7"
-                  className="fill-current text-green-400"
-                />
-              </svg>
-              <div className="flex flex-col">
-                <h3 className="text-lg font-semibold text-gray-200">
-                  {currentTask.title}
-                </h3>
-                <div className="flex items-center mt-1">
-                  <p className="text-xs text-gray-300 mr-4">
-                    Due:{" "}
-                    <span className="text-gray-200">
-                      {new Date(currentTask.due_date).toLocaleDateString()}
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-300 mr-4">
-                    Priority:{" "}
-                    <span className="text-gray-200">
-                      {currentTask.priority}
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-300">
-                    Duration:{" "}
-                    <span className="text-gray-200">
-                      {currentTask.duration}
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-300">
-                    Time Remaining:{" "}
-                    <span className="text-gray-200">
-                      {calculateTimeUntil(new Date(currentTask.due_date))}
-                    </span>
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleCompleteTask(currentTask.id)}
-                  className="mt-2 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 transition duration-300"
-                >
-                  Complete
-                </button>
-              </div>
-            </div>
-          </div>
+      {currentTask ? (
+  <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-4">
+    <h2 className="text-lg font-semibold mb-2">Current Task</h2>
+    <div className="flex items-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-10 w-10 text-yellow-400 mr-2"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <circle
+          cx="10"
+          cy="10"
+          r="7"
+          className="fill-current text-green-400"
+        />
+      </svg>
+      <div className="flex flex-col">
+        <h3 className="text-lg font-semibold text-gray-200">
+          {currentTask.title ? currentTask.title : 'No Title'}
+        </h3>
+        <div className="flex items-center mt-1">
+          <p className="text-xs text-gray-300 mr-4">
+            Due:{" "}
+            <span className="text-gray-200">
+              {currentTask.due_date ? new Date(currentTask.due_date).toLocaleDateString() : 'No Due Date'}
+            </span>
+          </p>
+          <p className="text-xs text-gray-300 mr-4">
+            Priority:{" "}
+            <span className="text-gray-200">
+              {currentTask.priority ? currentTask.priority : 'No Priority'}
+            </span>
+          </p>
+          <p className="text-xs text-gray-300">
+            Duration:{" "}
+            <span className="text-gray-200">
+              {currentTask.duration ? currentTask.duration : 'No Duration'}
+            </span>
+          </p>
+          {currentTask.due_date ? (
+            <p className="text-xs text-gray-300">
+              Time Remaining:{" "}
+              <span className="text-gray-200">
+                {calculateTimeRemaining(
+                  calculateEndTime(
+                    new Date(currentTask.due_date),
+                    currentTask.duration
+                  )
+                )}
+              </span>
+            </p>
+          ) : null}
+        </div>
+        <button
+          onClick={() => handleCompleteTask(currentTask.id)}
+          className="mt-2 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 transition duration-300"
+        >
+          Complete
+        </button>
+      </div>
+    </div>
+  </div>
+
         ) : upcomingTask ? (
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-4">
             <h2 className="text-lg font-semibold mb-2">Upcoming Task</h2>
@@ -1261,6 +1270,9 @@ const Home = ({ currentUser }) => {
                     <p className="text-gray-500 text-sm">
                       Due: {new Date(task.due_date).toLocaleDateString()}
                     </p>
+                    {/* // Inside the JSX where you want to display the time remaining */}
+
+
                   </div>
                   <button
                     onClick={() => handleDetailsClick(task)}
@@ -1422,6 +1434,436 @@ const Home = ({ currentUser }) => {
 };
 
 export default Home;
+
+
+
+
+// import React, { useState, useEffect, useCallback } from "react";
+// import { Link } from "react-router-dom";
+// import Calendar from "react-calendar";
+// import "react-calendar/dist/Calendar.css";
+// import axios from "axios";
+// import "./Home.css";
+
+// const Home = ({ currentUser }) => {
+//   const [selectedTask, setSelectedTask] = useState(null);
+//   const [showPopup, setShowPopup] = useState(false);
+//   const [tasks, setTasks] = useState([]);
+//   const [specialEvents, setSpecialEvents] = useState([]);
+//   const [completedTasks, setCompletedTasks] = useState([]);
+//   const [upcomingTask, setUpcomingTask] = useState(null);
+//   const [currentTask, setCurrentTask] = useState(null);
+//   const [selectedDay, setSelectedDay] = useState(new Date());
+
+//   const fetchTasks = useCallback(async () => {
+//     const authToken = localStorage.getItem("authToken");
+//     try {
+//       const response = await axios.get("http://localhost:3001/reminders", {
+//         headers: {
+//           Authorization: `Bearer ${authToken}`,
+//           Accept: "application/json",
+//         },
+//       });
+//       setTasks(response.data);
+//     } catch (error) {
+//       console.error("Error fetching tasks:", error);
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     fetchTasks();
+//   }, [fetchTasks]);
+
+//   const calculateEndTime = (dueDate, duration) => {
+//     if (!duration) {
+//       return dueDate;
+//     }
+//     const durationMinutes = parseInt(duration.split("-")[1], 10);
+//     const endTime = new Date(dueDate);
+//     endTime.setMinutes(endTime.getMinutes() + durationMinutes);
+//     return endTime;
+//   };
+
+//   const updateTasks = useCallback(() => {
+//     const now = new Date();
+//     const upcoming = tasks
+//       .filter((task) => new Date(task.due_date) > now)
+//       .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+
+//     const ongoing = tasks.filter((task) => {
+//       const dueDate = new Date(task.due_date);
+//       const endTime = calculateEndTime(dueDate, task.duration);
+//       return now >= dueDate && now < endTime;
+//     });
+
+//     if (ongoing.length > 0) {
+//       setCurrentTask(ongoing[0]);
+//       setUpcomingTask(
+//         upcoming[0] && ongoing[0].id !== upcoming[0].id ? upcoming[0] : null
+//       );
+//     } else if (upcoming.length > 0) {
+//       setCurrentTask(null);
+//       setUpcomingTask(upcoming[0]);
+//     } else {
+//       setCurrentTask(null);
+//       setUpcomingTask(null);
+//     }
+//   }, [tasks]);
+
+//   useEffect(() => {
+//     updateTasks();
+//     const interval = setInterval(updateTasks, 60000); // Update every minute
+//     return () => clearInterval(interval);
+//   }, [tasks, updateTasks]);
+
+//   const calculateTimeUntil = (dueDate) => {
+//     const diff = new Date(dueDate) - new Date();
+//     if (diff <= 0) return "Now";
+//     const seconds = Math.floor((diff / 1000) % 60);
+//     const minutes = Math.floor((diff / (1000 * 60)) % 60);
+//     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+//     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+//     return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+//   };
+
+//   const handleCompleteTask = async (taskId) => {
+//     const authToken = localStorage.getItem("authToken");
+//     try {
+//       await axios.put(`/tasks/${taskId}`, { completed: true }, {
+//         headers: {
+//           Authorization: `Bearer ${authToken}`,
+//           Accept: "application/json",
+//         },
+//       });
+//       setTasks(
+//         tasks.map((task) =>
+//           task.id === taskId ? { ...task, completed: true } : task
+//         )
+//       );
+//     } catch (error) {
+//       console.error("Error completing task:", error);
+//     }
+//   };
+
+//   const handleDetailsClick = (task) => {
+//     setSelectedTask(task);
+//     setShowPopup(true);
+//   };
+
+//   const handleClosePopup = () => {
+//     setShowPopup(false);
+//   };
+
+//   const handleDeleteClick = async (taskId) => {
+//     const authToken = localStorage.getItem("authToken");
+//     try {
+//       await axios.delete(`/tasks/${taskId}`, {
+//         headers: {
+//           Authorization: `Bearer ${authToken}`,
+//           Accept: "application/json",
+//         },
+//       });
+//       setTasks(tasks.filter((task) => task.id !== taskId));
+//       setShowPopup(false);
+//       setSelectedTask(null);
+//     } catch (error) {
+//       console.error("Error deleting task:", error);
+//     }
+//   };
+
+//   const handleClickDay = (day) => {
+//     setSelectedDay(day);
+//   };
+
+//   const addSpecialEvent = (date, name) => {
+//     const newEvent = { date, name };
+//     setSpecialEvents([...specialEvents, newEvent]);
+//   };
+
+//   return (
+//     <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
+//       {/* Task Alerts */}
+//       {currentTask ? (
+//         // Display current task
+//         <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-4">
+//           <h2 className="text-lg font-semibold mb-2">Current Task</h2>
+//           <div className="flex items-center">
+//             <svg
+//               xmlns="http://www.w3.org/2000/svg"
+//               className="h-10 w-10 text-yellow-400 mr-2"
+//               viewBox="0 0 20 20"
+//               fill="currentColor"
+//             >
+//               <circle
+//                 cx="10"
+//                 cy="10"
+//                 r="7"
+//                 className="fill-current text-green-400"
+//               />
+//             </svg>
+//             <div className="flex flex-col">
+//               <h3 className="text-lg font-semibold text-gray-200">
+//                 {currentTask.title}
+//               </h3>
+//               <div className="flex items-center mt-1">
+//                 <p className="text-xs text-gray-300 mr-4">
+//                   Due:{" "}
+//                   <span className="text-gray-200">
+//                     {new Date(currentTask.due_date).toLocaleDateString()}
+//                   </span>
+//                 </p>
+//                 <p className="text-xs text-gray-300 mr-4">
+//                   Priority:{" "}
+//                   <span className="text-gray-200">
+//                     {currentTask.priority}
+//                   </span>
+//                 </p>
+//                 <p className="text-xs text-gray-300">
+//                   Duration:{" "}
+//                   <span className="text-gray-200">
+//                     {currentTask.duration}
+//                   </span>
+//                 </p>
+//                 <p className="text-xs text-gray-300">
+//                   Time Remaining:{" "}
+//                   <span className="text-gray-200">
+//                     {calculateTimeUntil(new Date(currentTask.due_date))}
+//                   </span>
+//                 </p>
+//               </div>
+//               <button
+//                 onClick={() => handleCompleteTask(currentTask.id)}
+//                 className="mt-2 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-
+//                 transition duration-300"
+//                 >
+//                   Complete
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         ) : upcomingTask ? (
+//           // Display upcoming task
+//           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-4">
+//             <h2 className="text-lg font-semibold mb-2">Upcoming Task</h2>
+//             <div className="flex items-center">
+//               <svg
+//                 xmlns="http://www.w3.org/2000/svg"
+//                 className="h-10 w-10 text-yellow-400 mr-2"
+//                 viewBox="0 0 20 20"
+//                 fill="currentColor"
+//               >
+//                 <circle
+//                   cx="10"
+//                   cy="10"
+//                   r="7"
+//                   className="fill-current text-green-400"
+//                 />
+//               </svg>
+//               <div className="flex flex-col">
+//                 <h3 className="text-lg font-semibold text-gray-200">
+//                   {upcomingTask.title}
+//                 </h3>
+//                 <div className="flex items-center mt-1">
+//                   <p className="text-xs text-gray-300 mr-4">
+//                     Due:{" "}
+//                     <span className="text-gray-200">
+//                       {new Date(upcomingTask.due_date).toLocaleDateString()}
+//                     </span>
+//                   </p>
+//                   <p className="text-xs text-gray-300 mr-4">
+//                     Priority:{" "}
+//                     <span className="text-gray-200">
+//                       {upcomingTask.priority}
+//                     </span>
+//                   </p>
+//                   <p className="text-xs text-gray-300">
+//                     Time Until:{" "}
+//                     <span className="text-gray-200">
+//                       {calculateTimeUntil(new Date(upcomingTask.due_date))}
+//                     </span>
+//                   </p>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         ) : tasks.length > 0 ? (
+//           // Display no tasks
+//           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-4">
+//             <h2 className="text-lg font-semibold mb-2">No Tasks</h2>
+//             <p className="text-gray-200">You have no upcoming tasks.</p>
+//           </div>
+//         ) : null}
+  
+//         {/* Greeting */}
+//         <h1 className="text-2xl md:text-4xl font-semibold mb-1 mt-4 text-center text-gray-800">
+//           Welcome,{" "}
+//           <span className="text-purple-600 font-bold">
+//             {currentUser ? currentUser.name : "Guest"}
+//           </span>
+//           !
+//         </h1>
+//         <p className="text-gray-600 text-lg md:text-xl mb-4 text-center">
+//           Stay organized and boost your productivity!
+//         </p>
+  
+//         {/* Action Buttons */}
+//         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//           <Link to="/create">
+//             <button className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-300 block w-full">
+//               Create Task
+//             </button>
+//           </Link>
+//           <Link to="/tasks">
+//             <button className="bg-gray-700 hover:bg-gray-800 text-white py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-opacity-50 transition duration-300 block w-full">
+//               View Tasks
+//             </button>
+//           </Link>
+//         </div>
+  
+//         {/* Upcoming Tasks */}
+//         <div className="mt-8">
+//           <h2 className="text-xl font-semibold mb-4 text-center">Upcoming Tasks</h2>
+//           <ul className="divide-y divide-gray-200">
+//             {tasks
+//               .filter((task) => new Date(task.due_date) >= new Date()) // Filter tasks that haven't passed
+//               .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
+//               .slice(0, 4) // Only show the next 4 upcoming tasks
+//               .map((task) => (
+//                 <li key={task.id} className="py-2 flex items-center">
+//                   <div className="flex flex-col">
+//                     <h3 className="text-lg font-semibold">{task.title}</h3>
+//                     <p className="text-gray-500 text-sm">
+//                       Due: {new Date(task.due_date).toLocaleDateString()}
+//                     </p>
+//                   </div>
+//                   <button
+//                     onClick={() => handleDetailsClick(task)}
+//                     className="ml-auto bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-300"
+//                   >
+//                     Details
+//                   </button>
+//                 </li>
+//               ))}
+//           </ul>
+//         </div>
+  
+//         {/* Task Details Popup */}
+//         {showPopup && selectedTask && (
+//           <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center">
+//             <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 backdrop-filter backdrop-blur-lg"></div>
+//             <div className="bg-white rounded-lg p-8 w-96 relative z-10">
+//               <h3 className="text-lg font-semibold mb-4">{selectedTask.title}</h3>
+//               <p className="text-gray-500 text-sm mb-2">Due: {new Date(selectedTask.due_date).toLocaleDateString()}</p>
+//               <p className="text-gray-500 text-sm mb-2">Location: {selectedTask.location}</p>
+//               <p className="text-gray-700 mb-4">{selectedTask.description}</p>
+//               <div className="flex justify-between">
+//                 <div className="flex items-center">
+//                   <svg
+//                     onClick={handleClosePopup}
+//                     xmlns="http://www.w3.org/2000/svg"
+//                     className="h-6 w-6 cursor-pointer text-gray-500 hover:text-gray-700 mr-4"
+//                     fill="none"
+//                     viewBox="0 0 24 24"
+//                     stroke="currentColor"
+//                   >
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+//                   </svg>
+//                   <span className="text-gray-500 text-sm">Close</span>
+//                 </div>
+//                 <div className="flex items-center">
+//                   <svg
+//                     onClick={() => handleDeleteClick(selectedTask.id)}
+//                     xmlns="http://www.w3.org/2000/svg"
+//                     className="h-6 w-6 cursor-pointer text-red-500 hover:text-red-700 mr-4"
+//                     fill="none"
+//                     viewBox="0 0 24 24"
+//                     stroke="currentColor"
+//                   >
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+//                   </svg>
+//                   <span className="text-red-500 text-sm">Delete</span>
+//                 </div>
+//                 </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Calendar */}
+//       <div className="mt-8">
+//         <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Calendar</h2>
+//         <div className="calendar-grid bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-4 shadow-md">
+//           <Calendar
+//             onChange={setSelectedDay}
+//             value={selectedDay}
+//             className="w-full border border-gray-200"
+//             tileClassName={({ date, view }) =>
+//               view === "month" && date.getDate() === selectedDay.getDate()
+//                 ? "bg-purple-500 text-white rounded-full"
+//                 : ""
+//             }
+//           />
+//         </div>
+
+//         {/* Tasks on Selected Day */}
+//         {tasks
+//           .filter(
+//             (task) =>
+//               new Date(task.due_date).toDateString() ===
+//               selectedDay.toDateString()
+//           )
+//           .map((task, index) => (
+//             <div key={index} className="mt-4">
+//               <ul className="space-y-4">
+//                 <li className="task-item bg-white rounded-lg p-4 shadow-md hover:shadow-lg">
+//                   <div className="flex items-center justify-between">
+//                     <span className="text-gray-800 font-semibold">{task.title}</span>
+//                     <span className="text-gray-500 text-sm">Due: {new Date(task.due_date).toLocaleTimeString()}</span>
+//                   </div>
+//                   <p className="text-gray-600 mt-2">{task.description}</p>
+//                   <div className="flex justify-end mt-2">
+//                     <button className="text-sm text-white bg-blue-500 px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none">
+//                       Edit
+//                     </button>
+//                     <button className="ml-2 text-sm text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none">
+//                       Delete
+//                     </button>
+//                   </div>
+//                 </li>
+//               </ul>
+//             </div>
+//           ))}
+//       </div>
+
+//       {/* Notifications */}
+//       <div className="mt-8">
+//         <h2 className="text-xl font-semibold mb-4">Notifications</h2>
+//         <ul className="space-y-2">
+//           {tasks
+//             .filter((task) => new Date(task.due_date) < new Date())
+//             .map((task, index) => (
+//               <li key={index} className="flex items-center bg-red-100 rounded-lg px-4 py-2">
+//                 <span className="text-red-600">You missed the task: {task.title}</span>
+//                 <button className="ml-auto text-sm text-gray-600 bg-gray-200 px-3 py-1 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">Reschedule</button>
+//               </li>
+//             ))}
+//           <li className="flex items-center bg-blue-100 rounded-lg px-4 py-2">
+//             <span className="text-blue-600">You have a new task due today!</span>
+//           </li>
+//           {tasks
+//             .filter((task) => completedTasks.includes(task.id))
+//             .map((task) => (
+//               <li key={task.id} className="flex items-center bg-green-100 rounded-lg px-4 py-2">
+//                 <span className="text-green-600 line-through">Task completed: {task.title}</span>
+//               </li>
+//             ))}
+//         </ul>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Home;
+  
 
 // import React, { useState, useEffect } from "react";
 // import { Link } from "react-router-dom";
