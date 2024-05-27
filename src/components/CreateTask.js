@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import axios from "axios"; // Import Axios
 const isLoggedIn = true; // Placeholder value for isLoggedIn
@@ -42,67 +40,18 @@ const CreateTask = () => {
     setDuration(e.target.value);
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const authToken = localStorage.getItem("authToken");
-  //     console.log("Auth token:", authToken); // Log the auth token
-  
-  //     // Combine date and time without converting to UTC
-  //     const dueDateTime = `${dueDate}T${dueTime}:00`;
-  
-  //     // Adjust the dueDateTime to GMT+3 timezone
-  //     const adjustedDueDateTime = new Date(dueDateTime);
-  //     adjustedDueDateTime.setHours(adjustedDueDateTime.getHours() + 3); // Adding 3 hours for GMT+3
-  
-  //     // Convert adjustedDueDateTime to ISO string in the format YYYY-MM-DDTHH:MM:SSZ
-  //     const adjustedDueDateTimeString = adjustedDueDateTime.toISOString();
-  
-  //     const response = await axios.post(
-  //       "http://localhost:3001/reminders",
-  //       {
-  //         reminder: {
-  //           title: taskName,
-  //           due_date: adjustedDueDateTimeString,
-  //           priority: priority,
-  //           location: location,
-  //           description: details,
-  //           duration: duration
-  //         },
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${authToken}`,
-  //         },
-  //       }
-  //     );
-  //     console.log("Task submitted:", response.data); // Log the response data
-  //     // Optionally, you can handle success and reset form fields here
-  //     setTaskName("");
-  //     setDueDate("");
-  //     setDueTime("");
-  //     setPriority("");
-  //     setLocation("");
-  //     setDetails("");
-  //     setDuration("");
-  //     setError(null);
-  //   } catch (error) {
-  //     console.error("Error submitting task:", error);
-  //     setError("Error submitting task. Please try again.");
-  //   }
-  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const authToken = localStorage.getItem("authToken");
       console.log("Auth token:", authToken); // Log the auth token
-  
+
       // Combine date and time into a single string without converting to UTC
       const dueDateTime = `${dueDate}T${dueTime}:00`;
-  
+
       // Convert dueDateTime to an ISO string
       const dueDateTimeISO = new Date(dueDateTime).toISOString();
-  
+
       const response = await axios.post(
         "http://localhost:3001/reminders",
         {
@@ -112,7 +61,7 @@ const CreateTask = () => {
             priority: priority,
             location: location,
             description: details,
-            duration: duration
+            duration: duration,
           },
         },
         {
@@ -136,8 +85,7 @@ const CreateTask = () => {
       setError("Error submitting task. Please try again.");
     }
   };
-  
-  
+
   // Log the login status
   console.log("Is user logged in?", isLoggedIn);
 
@@ -175,7 +123,7 @@ const CreateTask = () => {
             className="rounded-md border border-gray-300 p-3 focus:outline-none focus:border-blue-500 w-full transition duration-300 ease-in-out hover:border-blue-500"
           />
         </div>
-       
+
         <div className="flex flex-col">
           <label
             htmlFor="dueTime"
@@ -256,25 +204,26 @@ const CreateTask = () => {
             value={duration}
             onChange={handleDurationChange}
             className="rounded-md border border-gray-300 p-3 focus:outline-none focus:border-blue-500 w-full transition duration-300 ease-in-out hover:border-blue
-            -500">
+            -500"
+          >
             <option value="">Select Duration</option>
             <option value="0-30 minutes">0-30 minutes</option>
             <option value="1 hour">1 hour</option>
             <option value="2 hours">2 hours</option>
             <option value="3 hours">3 hours</option>
             <option value="4 hours and above">4 hours and above</option>
-            </select>
-            </div>
-            {error && <p className="text-red-500">{error}</p>}
-            <button
-                   type="submit"
-                   className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300"
-                 >
-            Create Task
-            </button>
-            </form>
-            </div>
-            );
-            };
-            
-            export default CreateTask;
+          </select>
+        </div>
+        {error && <p className="text-red-500">{error}</p>}
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300"
+        >
+          Create Task
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default CreateTask;

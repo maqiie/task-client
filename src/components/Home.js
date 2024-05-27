@@ -467,7 +467,7 @@ t
             ))}
         </div>
 
-        <div className="mt-8">
+        {/* <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Notifications</h2>
           <ul className="space-y-2">
             {tasks
@@ -503,7 +503,99 @@ t
                 </li>
               ))}{" "}
           </ul>
-        </div>
+        </div> */}
+        {/* <div className="mt-8">
+  <h2 className="text-xl font-semibold mb-4">Notifications</h2>
+  <ul className="space-y-2">
+    {tasks
+      .filter((task) => new Date(task.due_date) < new Date())
+      .slice(-4) // Selecting the last four missed tasks
+      .map((task, index) => (
+        <li
+          key={index}
+          className="flex items-center bg-red-100 rounded-lg px-4 py-2"
+        >
+          <span className="text-red-600">
+            You missed the task: {task.title}
+          </span>
+          <button className="ml-auto text-sm text-gray-600 bg-gray-200 px-3 py-1 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
+            Reschedule
+          </button>
+        </li>
+      ))}
+    <li className="flex items-center bg-blue-100 rounded-lg px-4 py-2">
+      <span className="text-blue-600">
+        You have a new task due today!
+      </span>
+    </li>
+    {tasks
+      .filter((task) => completedTasks.includes(task.id))
+      .map((task) => (
+        <li
+          key={task.id}
+          className="flex items-center bg-green-100 rounded-lg px-4 py-2"
+        >
+          <span className="text-green-600 line-through">
+            Task completed: {task.title}
+          </span>
+        </li>
+      ))}{" "}
+  </ul>
+</div> */}
+<div className="mt-8">
+  <h2 className="text-xl font-semibold mb-4">Notifications</h2>
+  <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
+  <ul className="space-y-4">
+    {tasks
+      .filter((task) => new Date(task.due_date) < new Date())
+      .slice(-4)
+      .map((task, index) => (
+        <li
+          key={index}
+          className="flex items-center bg-red-100 rounded-lg px-4 py-3 shadow-md"
+        >
+          <span className="text-red-600 flex-grow">
+            You missed the task: {task.title}
+          </span>
+          <button className="ml-4 text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
+            Reschedule
+          </button>
+        </li>
+      ))}
+  </ul>
+  <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
+  <ul className="space-y-4">
+    {tasks
+      .filter((task) => completedTasks.includes(task.id))
+      .map((task) => (
+        <li
+          key={task.id}
+          className="flex items-center bg-green-100 rounded-lg px-4 py-3 shadow-md"
+        >
+          <span className="text-green-600 flex-grow line-through">
+            Task completed: {task.title}
+          </span>
+        </li>
+      ))}
+  </ul>
+  <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
+  <ul className="space-y-4">
+    {tasks
+      .filter((task) => new Date(task.due_date) >= new Date())
+      .map((task, index) => (
+        <li
+          key={index}
+          className="flex items-center bg-blue-100 rounded-lg px-4 py-3 shadow-md"
+        >
+          <span className="text-blue-600 flex-grow">
+            Upcoming task: {task.title}
+          </span>
+        </li>
+      ))}
+  </ul>
+</div>
+
+
       </div>
     </div>
   );
