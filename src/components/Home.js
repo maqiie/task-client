@@ -306,7 +306,7 @@ const Home = ({ currentUser }) => {
   </div>
 ) : null}
 
-
+t
         <h1 className="text-2xl md:text-4xl font-semibold mb-1 mt-4 text-center text-gray-800">
           Welcome,{" "}
           <span className="text-purple-600 font-bold">
