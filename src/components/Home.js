@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Calendar from "react-calendar";
@@ -17,6 +14,8 @@ const Home = ({ currentUser }) => {
   const [upcomingTask, setUpcomingTask] = useState(null);
   const [currentTask, setCurrentTask] = useState(null);
   const [selectedDay, setSelectedDay] = useState(new Date());
+  const [completed, setCompleted] = useState(false); // New state variable to track completion
+  const now = new Date();
 
   const currentDate = new Date(); // This gets the current date and time in UTC
   const localCurrentDate = new Date(
@@ -32,7 +31,12 @@ const Home = ({ currentUser }) => {
           Accept: "application/json",
         },
       });
-      setTasks(response.data);
+
+      // Filter out tasks where completed is true
+      const incompleteTasks = response.data.filter((task) => !task.completed);
+
+      // Update the state with incomplete tasks only
+      setTasks(incompleteTasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
     }
@@ -41,6 +45,45 @@ const Home = ({ currentUser }) => {
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+  const fetchCompletedTasks = async () => {
+    const authToken = localStorage.getItem("authToken");
+    try {
+      const response = await axios.get("http://localhost:3001/reminders", {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          Accept: "application/json",
+        },
+      });
+
+      // Filter out reminders where completed is true
+      const completedReminders = response.data.filter(
+        (reminder) => reminder.completed
+      );
+
+      return completedReminders;
+    } catch (error) {
+      console.error("Error fetching completed reminders:", error);
+      return []; // Return an empty array in case of error
+    }
+  };
+
+  // Example usage of fetchCompletedTasks:
+  const loadCompletedTasks = async () => {
+    try {
+      const completedTasksData = await fetchCompletedTasks(); // Fetch completed tasks data
+      setCompletedTasks(completedTasksData); // Update the completedTasks state with the fetched data
+      console.log("Completed Tasks:", completedTasksData);
+      // Do something with the completed tasks
+    } catch (error) {
+      console.error("Error loading completed tasks:", error);
+    }
+  };
+  useEffect(() => {
+    fetchTasks(); // Fetch incomplete tasks
+    loadCompletedTasks(); // Fetch completed tasks
+  }, []); // Empty dependency array to run this effect only once when the component mounts
+    
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -134,18 +177,44 @@ const Home = ({ currentUser }) => {
     console.log("Time remaining for current task:", timeRemaining);
   }
 
-  const handleCompleteTask = async (taskId) => {
+  const handleCompleteTask = async (reminderId) => {
+    const authToken = localStorage.getItem("authToken");
     try {
-      await axios.put(`/tasks/${taskId}`, { completed: true });
-      setTasks(
-        tasks.map((task) =>
-          task.id === taskId ? { ...task, completed: true } : task
-        )
+      await axios.patch(
+        `http://localhost:3001/reminders/${reminderId}/complete`,
+        { completed: true },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            Accept: "application/json",
+          },
+        }
       );
+
+      // Update the tasks state to remove the completed task
+      setTasks((updatedTasks) =>
+        updatedTasks.filter((task) => task.id !== reminderId)
+      );
+
+      // Update the current task and upcoming task if needed
+      updateTasks();
     } catch (error) {
       console.error("Error completing task:", error);
     }
   };
+
+  const upcoming = tasks
+    .filter((task) => {
+      const dueDate = new Date(task.due_date);
+      return dueDate.getTime() > now.getTime() && !task.completed;
+    })
+    .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+  const currentTasks = tasks.filter((task) => {
+    const dueDate = new Date(task.due_date);
+    const endTime = calculateEndTime(dueDate, task.duration);
+    // Check if task is ongoing and not completed
+    return now >= dueDate && now < endTime && !task.completed;
+  });
 
   const handleTaskClick = (task) => {
     setSelectedTask(task);
@@ -163,11 +232,21 @@ const Home = ({ currentUser }) => {
   const handleClosePopup = () => {
     setShowPopup(false);
   };
+  const handleDeleteClick = async (reminderId) => {
+    const authToken = localStorage.getItem("authToken");
 
-  const handleDeleteClick = async (taskId) => {
     try {
-      await axios.delete(`/tasks/${taskId}`);
-      setTasks(tasks.filter((task) => task.id !== taskId));
+      await axios.delete(`http://localhost:3001/reminders/${reminderId}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          Accept: "application/json",
+        },
+      });
+
+      // Update the tasks state to remove the deleted reminder
+      setTasks(tasks.filter((task) => task.id !== reminderId));
+
+      // Close the popup and clear the selected task
       setShowPopup(false);
       setSelectedTask(null);
     } catch (error) {
@@ -183,130 +262,132 @@ const Home = ({ currentUser }) => {
     const newEvent = { date, name };
     setSpecialEvents([...specialEvents, newEvent]);
   };
+
   return (
     <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
       <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
-      {currentTask ? (
-  <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg">
-    <h2 className="text-lg font-semibold mb-4 md:mb-2">Current Task</h2>
-    <div className="flex flex-col md:flex-row items-center">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-12 w-12 text-yellow-400 md:mr-4 md:mb-0 mb-4 md:mb-0"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <circle
-          cx="10"
-          cy="10"
-          r="7"
-          className="fill-current text-green-400"
-        />
-      </svg>
-      <div className="flex flex-col">
-        <h3 className="text-lg font-semibold text-gray-200">
-          {currentTask.title ? currentTask.title : "No Title"}
-        </h3>
-        <div className="flex flex-wrap items-center mt-2">
-          <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
-            Due:{" "}
-            <span className="text-gray-200">
-              {currentTask.due_date
-                ? new Date(currentTask.due_date).toLocaleDateString()
-                : "No Due Date"}
-            </span>
-          </p>
-          <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
-            Priority:{" "}
-            <span className="text-gray-200">
-              {currentTask.priority
-                ? currentTask.priority
-                : "No Priority"}
-            </span>
-          </p>
-          <p className="text-xs text-gray-300 mb-2 md:mb-0">
-            Duration:{" "}
-            <span className="text-gray-200">
-              {currentTask.duration
-                ? currentTask.duration
-                : "No Duration"}
-            </span>
-          </p>
-          {currentTask.due_date ? (
-            <p className="text-xs text-gray-300">
-              Time Remaining:{" "}
-              <span className="text-gray-200">
-                {calculateTimeRemaining(
-                  calculateEndTime(
-                    new Date(currentTask.due_date),
-                    currentTask.duration
-                  )
-                )}
-              </span>
-            </p>
-          ) : null}
-        </div>
-        <button
-          onClick={() => handleCompleteTask(currentTask.id)}
-          className="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 transition duration-300"
-        >
-          Complete
-        </button>
-      </div>
-    </div>
-  </div>
-) : upcomingTask ? (
-  <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg">
-    <h2 className="text-lg font-semibold mb-4 md:mb-2">Upcoming Task</h2>
-    <div className="flex items-center">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-12 w-12 text-yellow-400 mr-4"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <circle
-          cx="10"
-          cy="10"
-          r="7"
-          className="fill-current text-green-400"
-        />
-      </svg>
-      <div className="flex flex-col">
-        <h3 className="text-lg font-semibold text-gray-200">
-          {upcomingTask.title}
-        </h3>
-        <div className="flex items-center mt-2">
-          <p className="text-xs text-gray-300 mr-4">
-            Due:{" "}
-            <span className="text-gray-200">
-              {new Date(upcomingTask.due_date).toLocaleDateString()}
-            </span>
-          </p>
-          <p className="text-xs text-gray-300 mr-4">
-            Priority:{" "}
-            <span className="text-gray-200">
-              {upcomingTask.priority}
-            </span>
-          </p>
-          <p className="text-xs text-gray-300">
-            Time Until:{" "}
-            <span className="text-gray-200">
-              {calculateTimeUntil(new Date(upcomingTask.due_date))}
-            </span>
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-) : tasks.length > 0 ? (
-  <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg">
-    <h2 className="text-lg font-semibold mb-4 md:mb-2">No Tasks</h2>
-    <p className="text-gray-200">You have no upcoming tasks.</p>
-  </div>
-) : null}
-
-t
+        {currentTask ? (
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg">
+            <h2 className="text-lg font-semibold mb-4 md:mb-2">Current Task</h2>
+            <div className="flex flex-col md:flex-row items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-12 w-12 text-yellow-400 md:mr-4 md:mb-0 mb-4 md:mb-0"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <circle
+                  cx="10"
+                  cy="10"
+                  r="7"
+                  className="fill-current text-green-400"
+                />
+              </svg>
+              <div className="flex flex-col">
+                <h3 className="text-lg font-semibold text-gray-200">
+                  {currentTask.title ? currentTask.title : "No Title"}
+                </h3>
+                <div className="flex flex-wrap items-center mt-2">
+                  <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
+                    Due:{" "}
+                    <span className="text-gray-200">
+                      {currentTask.due_date
+                        ? new Date(currentTask.due_date).toLocaleDateString()
+                        : "No Due Date"}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
+                    Priority:{" "}
+                    <span className="text-gray-200">
+                      {currentTask.priority
+                        ? currentTask.priority
+                        : "No Priority"}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-300 mb-2 md:mb-0">
+                    Duration:{" "}
+                    <span className="text-gray-200">
+                      {currentTask.duration
+                        ? currentTask.duration
+                        : "No Duration"}
+                    </span>
+                  </p>
+                  {currentTask.due_date ? (
+                    <p className="text-xs text-gray-300">
+                      Time Remaining:{" "}
+                      <span className="text-gray-200">
+                        {calculateTimeRemaining(
+                          calculateEndTime(
+                            new Date(currentTask.due_date),
+                            currentTask.duration
+                          )
+                        )}
+                      </span>
+                    </p>
+                  ) : null}
+                </div>
+                <button
+                  onClick={() => handleCompleteTask(currentTask.id)}
+                  className="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 transition duration-300"
+                >
+                  Complete
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : upcomingTask ? (
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg">
+            <h2 className="text-lg font-semibold mb-4 md:mb-2">
+              Upcoming Task
+            </h2>
+            <div className="flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-12 w-12 text-yellow-400 mr-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <circle
+                  cx="10"
+                  cy="10"
+                  r="7"
+                  className="fill-current text-green-400"
+                />
+              </svg>
+              <div className="flex flex-col">
+                <h3 className="text-lg font-semibold text-gray-200">
+                  {upcomingTask.title}
+                </h3>
+                <div className="flex items-center mt-2">
+                  <p className="text-xs text-gray-300 mr-4">
+                    Due:{" "}
+                    <span className="text-gray-200">
+                      {new Date(upcomingTask.due_date).toLocaleDateString()}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-300 mr-4">
+                    Priority:{" "}
+                    <span className="text-gray-200">
+                      {upcomingTask.priority}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-300">
+                    Time Until:{" "}
+                    <span className="text-gray-200">
+                      {calculateTimeUntil(new Date(upcomingTask.due_date))}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : tasks.length > 0 ? (
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg">
+            <h2 className="text-lg font-semibold mb-4 md:mb-2">No Tasks</h2>
+            <p className="text-gray-200">You have no upcoming tasks.</p>
+          </div>
+        ) : null}
+        t
         <h1 className="text-2xl md:text-4xl font-semibold mb-1 mt-4 text-center text-gray-800">
           Welcome,{" "}
           <span className="text-purple-600 font-bold">
@@ -314,11 +395,9 @@ t
           </span>
           !
         </h1>
-
         <p className="text-gray-600 text-lg md:text-xl mb-4 text-center">
           Stay organized and boost your productivity!
         </p>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link to="/create">
             <button className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-300 block w-full">
@@ -331,7 +410,6 @@ t
             </button>
           </Link>
         </div>
-
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4 text-center">
             Upcoming Tasks
@@ -416,7 +494,6 @@ t
             </div>
           )}
         </div>
-
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">
             Calendar
@@ -466,136 +543,69 @@ t
               </div>
             ))}
         </div>
-
-        {/* <div className="mt-8">
+        <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Notifications</h2>
-          <ul className="space-y-2">
-            {tasks
-              .filter((task) => new Date(task.due_date) < new Date())
-              .map((task, index) => (
-                <li
-                  key={index}
-                  className="flex items-center bg-red-100 rounded-lg px-4 py-2"
-                >
-                  <span className="text-red-600">
-                    You missed the task: {task.title}
-                  </span>
-                  <button className="ml-auto text-sm text-gray-600 bg-gray-200 px-3 py-1 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
-                    Reschedule
-                  </button>
-                </li>
-              ))}
-            <li className="flex items-center bg-blue-100 rounded-lg px-4 py-2">
-              <span className="text-blue-600">
-                You have a new task due today!
-              </span>
-            </li>
-            {tasks
-              .filter((task) => completedTasks.includes(task.id))
-              .map((task) => (
-                <li
-                  key={task.id}
-                  className="flex items-center bg-green-100 rounded-lg px-4 py-2"
-                >
-                  <span className="text-green-600 line-through">
-                    Task completed: {task.title}
-                  </span>
-                </li>
-              ))}{" "}
-          </ul>
-        </div> */}
-        {/* <div className="mt-8">
-  <h2 className="text-xl font-semibold mb-4">Notifications</h2>
-  <ul className="space-y-2">
-    {tasks
-      .filter((task) => new Date(task.due_date) < new Date())
-      .slice(-4) // Selecting the last four missed tasks
-      .map((task, index) => (
-        <li
-          key={index}
-          className="flex items-center bg-red-100 rounded-lg px-4 py-2"
-        >
-          <span className="text-red-600">
-            You missed the task: {task.title}
-          </span>
-          <button className="ml-auto text-sm text-gray-600 bg-gray-200 px-3 py-1 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
-            Reschedule
-          </button>
-        </li>
-      ))}
-    <li className="flex items-center bg-blue-100 rounded-lg px-4 py-2">
-      <span className="text-blue-600">
-        You have a new task due today!
-      </span>
-    </li>
-    {tasks
-      .filter((task) => completedTasks.includes(task.id))
-      .map((task) => (
-        <li
-          key={task.id}
-          className="flex items-center bg-green-100 rounded-lg px-4 py-2"
-        >
-          <span className="text-green-600 line-through">
-            Task completed: {task.title}
-          </span>
-        </li>
-      ))}{" "}
-  </ul>
-</div> */}
-<div className="mt-8">
-  <h2 className="text-xl font-semibold mb-4">Notifications</h2>
-  <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
-  <ul className="space-y-4">
-    {tasks
-      .filter((task) => new Date(task.due_date) < new Date())
-      .slice(-4)
-      .map((task, index) => (
-        <li
-          key={index}
-          className="flex items-center bg-red-100 rounded-lg px-4 py-3 shadow-md"
-        >
-          <span className="text-red-600 flex-grow">
-            You missed the task: {task.title}
-          </span>
-          <button className="ml-4 text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
-            Reschedule
-          </button>
-        </li>
-      ))}
-  </ul>
-  <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
-  <ul className="space-y-4">
-    {tasks
-      .filter((task) => completedTasks.includes(task.id))
-      .map((task) => (
-        <li
-          key={task.id}
-          className="flex items-center bg-green-100 rounded-lg px-4 py-3 shadow-md"
-        >
-          <span className="text-green-600 flex-grow line-through">
-            Task completed: {task.title}
-          </span>
-        </li>
-      ))}
-  </ul>
-  <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
-  <ul className="space-y-4">
-    {tasks
-      .filter((task) => new Date(task.due_date) >= new Date())
-      .map((task, index) => (
-        <li
-          key={index}
-          className="flex items-center bg-blue-100 rounded-lg px-4 py-3 shadow-md"
-        >
-          <span className="text-blue-600 flex-grow">
-            Upcoming task: {task.title}
-          </span>
-        </li>
-      ))}
-  </ul>
-</div>
 
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
+              <ul className="space-y-2">
+                {tasks
+                  .filter((task) => new Date(task.due_date) < new Date())
+                  .slice(-4)
+                  .map((task, index) => (
+                    <li
+                      key={index}
+                      className="bg-red-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+                    >
+                      <span className="text-red-600">
+                        You missed the task: {task.title}
+                      </span>
+                      <button className="text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
+                        Reschedule
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </div>
 
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
+              <div className="completed-tasks-container max-h-72 overflow-y-auto">
+                <ul className="space-y-2">
+                  {completedTasks.slice(0, 3).map((task) => (
+                    <li
+                      key={task.id}
+                      className="completed-task bg-green-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+                    >
+                      <span className="text-green-600 line-through">
+                        Task completed: {task.title}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
+              <ul className="space-y-2">
+                {tasks
+                  .filter((task) => new Date(task.due_date) >= new Date())
+                  .map((task, index) => (
+                    <li
+                      key={index}
+                      className="bg-blue-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+                    >
+                      <span className="text-blue-600">
+                        Upcoming task: {task.title}
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

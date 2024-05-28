@@ -90,7 +90,8 @@ import Login from "./components/Login";
 import Task from "./components/Task";
 import SpecialEvents from "./components/SpecialEvents";
 import UserProfile from "./components/UserProfile";
-import Notification from "./components/Notification"; // Import Notification component
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -129,15 +130,32 @@ function App() {
   }, []);
 
   const handleLogout = () => {
-    // Clear user data and token from localStorage
     localStorage.removeItem("authToken");
     setCurrentUser(null);
   };
 
+  const notify = (message) => toast.info(message); // Function to display notifications
+  const fetchScheduledNotifications = async () => {
+    try {
+      const storedToken = localStorage.getItem("authToken");
+      const response = await axios.get("http://localhost:3001/notifications", {
+        headers: {
+          Authorization: `Bearer ${storedToken}`
+        }
+      });
+      const notifications = response.data.notifications;
+      // Display notifications...
+    } catch (error) {
+      console.error("Error fetching scheduled notifications:", error);
+      // Handle error...
+    }
+  };
+  
+
   return (
     <Router>
       <Navbar currentUser={currentUser} onLogout={handleLogout} />
-      {/* <Notification /> Add Notification component here */}
+      <ToastContainer />
       <Routes>
         <Route path="/" element={<Home currentUser={currentUser} />} />
         <Route path="/create/*" element={currentUser ? <CreateTask /> : <Navigate to="/login" />} />
@@ -152,4 +170,3 @@ function App() {
 }
 
 export default App;
-
