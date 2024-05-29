@@ -1,8 +1,9 @@
 
 // import React, { useEffect, useState } from "react";
 // import axios from "axios";
-// import { toast, ToastContainer } from "react-toastify";
+// import { toast, ToastContainer, cssTransition } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
+// import "./Notification.css"; // Ensure this path is correct
 
 // const Notification = () => {
 //   const [reminders, setReminders] = useState([]);
@@ -19,8 +20,8 @@
 //             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
 //           },
 //         });
-//         console.log("Fetched reminders:", response.data.reminders);
-//         setReminders(response.data.reminders || []);
+//         console.log("Fetched reminders:", response.data);
+//         setReminders(response.data || []);
 //       } catch (error) {
 //         console.error("Error fetching reminders:", error);
 //         toast.error("Error fetching reminders");
@@ -58,14 +59,25 @@
 //       const currentTime = new Date();
 //       notifications.forEach((notification) => {
 //         const notificationTime = new Date(notification.created_at);
+//         console.log("Notification time check:", notificationTime, currentTime);
 //         if (
 //           notificationTime <= currentTime &&
 //           !displayedNotifications.includes(notification.id)
 //         ) {
+//           console.log("Displaying notification:", notification);
 //           toast.info(notification.message, {
 //             autoClose: getAutoCloseDuration(notification.schedule),
-//             style: { backgroundColor: "#007bff", color: "#ffffff" },
+//             className: "custom-toast",
+//             bodyClassName: "custom-toast-body",
+//             progressClassName: "custom-toast-progress",
+//             position: "top-right", // Specify the position as a string
+//             transition: cssTransition({
+//               enter: "fadeIn",
+//               exit: "fadeOut",
+//               duration: 750,
+//             }),
 //           });
+          
 //           setDisplayedNotifications((prev) => {
 //             const newDisplayed = [...prev, notification.id];
 //             localStorage.setItem(
@@ -172,8 +184,7 @@ const Notification = () => {
           !displayedNotifications.includes(notification.id)
         ) {
           console.log("Displaying notification:", notification);
-          toast.info(notification.message, {
-            autoClose: getAutoCloseDuration(notification.schedule),
+          const toastId = toast.info(notification.message, {
             className: "custom-toast",
             bodyClassName: "custom-toast-body",
             progressClassName: "custom-toast-progress",
@@ -193,6 +204,10 @@ const Notification = () => {
             );
             return newDisplayed;
           });
+
+          setTimeout(() => {
+            toast.dismiss(toastId);
+          }, getAutoCloseDuration(notification.schedule));
         }
       });
     };

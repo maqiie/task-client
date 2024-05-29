@@ -1,8 +1,39 @@
 /* src/Notification.css */
-@keyframes fadeIn {
+.custom-toast {
+    border-radius: 8px;
+    background-color: #4b0082; /* Indigo purple background */
+    color: #ffffff; /* White text */
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    align-items: center;
+    animation: fadeIn 0.5s ease-out, fadeOut 0.5s ease-out;
+  }
+  
+  .custom-toast-body {
+    font-size: 16px;
+    margin-left: 10px;
+  }
+  
+  .custom-toast-progress {
+    background-color: #ffffff; /* White progress bar */
+  }
+  
+  .custom-toast-close {
+    margin-left: auto;
+    cursor: pointer;
+    opacity: 0.8;
+  }
+  
+  .custom-toast-close:hover {
+    opacity: 1;
+  }
+  
+  @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(20px);
     }
     to {
       opacity: 1;
@@ -17,58 +48,7 @@
     }
     to {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(20px);
     }
-  }
-  
-  .custom-toast {
-    border-radius: 8px;
-    background-color: #4b0082; /* Indigo purple background */
-    color: #ffffff;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #ffffff; /* White accent border */
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    align-items: center;
-    animation: fadeIn 0.5s, fadeOut 0.5s ease-out;
-  }
-  
-  .custom-toast-body {
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffffff; /* White text */
-    margin-left: 10px;
-  }
-  
-  .custom-toast-progress {
-    background-color: #ffffff; /* White progress bar */
-  }
-  
-  .custom-toast-icon {
-    background-color: #4b0082; /* Indigo purple icon background */
-    padding: 10px;
-    border-radius: 50%;
-    color: #ffffff; /* White icon */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .toastify__toast--info {
-    border-left-color: #ffffff; /* White border for info type */
-  }
-  
-  .custom-toast-close {
-    margin-left: auto;
-    cursor: pointer;
-    color: #ffffff; /* White close button */
-    opacity: 0.8;
-  }
-  
-  .custom-toast-close:hover {
-    opacity: 1;
   }
   
