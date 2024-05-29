@@ -1,163 +1,181 @@
-// import React, { useState, useEffect } from "react";
+
+// import React, { useEffect, useState } from "react";
 // import axios from "axios";
-// import { ToastContainer, toast } from "react-toastify";
+// import { toast, ToastContainer } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
 
-// function Notification() {
+// const Notification = () => {
+//   const [reminders, setReminders] = useState([]);
 //   const [notifications, setNotifications] = useState([]);
 
 //   useEffect(() => {
+//     const fetchReminders = async () => {
+//       try {
+//         const response = await axios.get("http://localhost:3001/reminders", {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//           },
+//         });
+//         console.log("Fetched reminders:", response.data.reminders);
+//         setReminders(response.data.reminders || []);
+//       } catch (error) {
+//         console.error("Error fetching reminders:", error);
+//         toast.error("Error fetching reminders");
+//       }
+//     };
+
 //     const fetchNotifications = async () => {
 //       try {
 //         const response = await axios.get("http://localhost:3001/notifications", {
 //           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("authToken")}`
-//           }
+//             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//           },
 //         });
-//         setNotifications(response.data);
+//         console.log("Fetched notifications:", response.data.notifications);
+//         setNotifications(response.data.notifications || []);
 //       } catch (error) {
 //         console.error("Error fetching notifications:", error);
-//         // Display error notification using react-toastify
 //         toast.error("Error fetching notifications");
 //       }
 //     };
 
-//     // Fetch notifications initially and then every 30 seconds
+//     fetchReminders();
 //     fetchNotifications();
-//     const interval = setInterval(fetchNotifications, 30000);
+
+//     const interval = setInterval(() => {
+//       fetchReminders();
+//       fetchNotifications();
+//     }, 30000);
 
 //     return () => clearInterval(interval);
 //   }, []);
-
-//   return (
-//     <div>
-//       <h2>Notifications</h2>
-//       <ul>
-//         {notifications.map(notification => (
-//           <li key={notification.id}>
-//             {notification.message}
-//           </li>
-//         ))}
-//       </ul>
-//       <ToastContainer autoClose={3000} />
-//     </div>
-//   );
-// }
-
-// export default Notification;
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-// import { ToastContainer, toast } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
-
-// function Notification() {
-//   const [notifications, setNotifications] = useState([]);
 
 //   useEffect(() => {
-//     const fetchNotifications = async () => {
-//       try {
-//         const response = await axios.get("http://localhost:3001/notifications", {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("authToken")}`
-//           }
-//         });
-//         setNotifications(response.data);
-//       } catch (error) {
-//         console.error("Error fetching notifications:", error);
-//         // Display error notification using react-toastify
-//         toast.error("Error fetching notifications");
-//       }
+//     const checkNotifications = () => {
+//       notifications.forEach((notification) => {
+//         const reminder = reminders.find((r) => r.id === notification.reminder_id);
+//         if (reminder) {
+//           toast.info(notification.message, {
+//             autoClose: getAutoCloseDuration(notification.schedule),
+//             style: { backgroundColor: "#007bff", color: "#ffffff" },
+//           });
+//         }
+//       });
 //     };
 
-//     // Fetch notifications initially and then every 30 seconds
-//     fetchNotifications();
-//     const interval = setInterval(fetchNotifications, 30000);
+//     if (reminders.length > 0 && notifications.length > 0) {
+//       checkNotifications();
+//     }
+//   }, [notifications, reminders]);
 
-//     return () => clearInterval(interval);
-//   }, []);
-
-//   // Function to format notification schedule
-//   const formatSchedule = (schedule) => {
+//   const getAutoCloseDuration = (schedule) => {
 //     switch (schedule) {
 //       case "24_hours":
-//         return "24 hours before";
+//       case "1_hour":
+//         return 10000; // 10 seconds
 //       case "30_minutes":
-//         return "30 minutes before";
-//       case "15_minutes":
-//         return "15 minutes before";
 //       case "5_minutes":
-//         return "5 minutes before";
+//         return 5000; // 5 seconds
 //       case "start":
-//         return "Start";
+//         return 2000; // 2 seconds
 //       default:
-//         return "";
+//         return 3000; // Default to 3 seconds
 //     }
 //   };
 
-//   return (
-//     <div>
-//       <h2>Notifications</h2>
-//       <ul>
-//         {notifications.map(notification => (
-//           <li key={notification.id}>
-//             <strong>{formatSchedule(notification.schedule)}:</strong> {notification.message}
-//           </li>
-//         ))}
-//       </ul>
-//       <ToastContainer autoClose={3000} />
-//     </div>
-//   );
-// }
+//   return <ToastContainer />;
+// };
 
 // export default Notification;
-import React, { useEffect } from "react";
+
+
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function Notification() {
+const Notification = () => {
+  const [reminders, setReminders] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [displayedNotifications, setDisplayedNotifications] = useState(
+    JSON.parse(localStorage.getItem("displayedNotifications")) || []
+  );
+
   useEffect(() => {
+    const fetchReminders = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/reminders", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        });
+        console.log("Fetched reminders:", response.data.reminders);
+        setReminders(response.data.reminders || []);
+      } catch (error) {
+        console.error("Error fetching reminders:", error);
+        toast.error("Error fetching reminders");
+      }
+    };
+
     const fetchNotifications = async () => {
       try {
         const response = await axios.get("http://localhost:3001/notifications", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
         });
-        response.data.forEach(notification => {
-          toast.info(`${notification.message} (${formatSchedule(notification.schedule)})`, {
-            autoClose: getAutoCloseDuration(notification.schedule),
-          });
-        });
+        console.log("Fetched notifications:", response.data.notifications);
+        setNotifications(response.data.notifications || []);
       } catch (error) {
         console.error("Error fetching notifications:", error);
         toast.error("Error fetching notifications");
       }
     };
 
-    // Fetch notifications initially and then every 30 seconds
+    fetchReminders();
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
+
+    const interval = setInterval(() => {
+      fetchReminders();
+      fetchNotifications();
+    }, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const formatSchedule = (schedule) => {
-    switch (schedule) {
-      case "24_hours":
-        return "24 hours before";
-      case "1_hour":
-        return "1 hour before";
-      case "30_minutes":
-        return "30 minutes before";
-      case "5_minutes":
-        return "5 minutes before";
-      case "start":
-        return "at start time";
-      default:
-        return "";
+  useEffect(() => {
+    const checkNotifications = () => {
+      const currentTime = new Date();
+      notifications.forEach((notification) => {
+        const notificationTime = new Date(notification.created_at);
+        if (
+          notificationTime <= currentTime &&
+          !displayedNotifications.includes(notification.id)
+        ) {
+          toast.info(notification.message, {
+            autoClose: getAutoCloseDuration(notification.schedule),
+            style: { backgroundColor: "#007bff", color: "#ffffff" },
+          });
+          setDisplayedNotifications((prev) => {
+            const newDisplayed = [...prev, notification.id];
+            localStorage.setItem(
+              "displayedNotifications",
+              JSON.stringify(newDisplayed)
+            );
+            return newDisplayed;
+          });
+        }
+      });
+    };
+
+    if (reminders.length > 0 && notifications.length > 0) {
+      checkNotifications();
     }
-  };
+
+    const interval = setInterval(checkNotifications, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [notifications, reminders, displayedNotifications]);
 
   const getAutoCloseDuration = (schedule) => {
     switch (schedule) {
@@ -175,6 +193,6 @@ function Notification() {
   };
 
   return <ToastContainer />;
-}
+};
 
 export default Notification;
