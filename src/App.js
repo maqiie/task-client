@@ -316,7 +316,8 @@ function App() {
   return (
     <Router>
       <Navbar currentUser={currentUser} onLogout={handleLogout} />
-      <Notification /> {/* Include the Notification component */}
+      <Notification currentUser={currentUser} /> {/* Pass currentUser here */}
+
       <Routes>
         <Route path="/" element={<Home currentUser={currentUser} />} />
         <Route path="/create/*" element={currentUser ? <CreateTask /> : <Navigate to="/login" />} />
