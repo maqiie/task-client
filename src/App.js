@@ -261,6 +261,7 @@ import Task from "./components/Task";
 import SpecialEvents from "./components/SpecialEvents";
 import UserProfile from "./components/UserProfile";
 import Notification from "./components/Notification"; // Import the Notification component
+import Footer from "./components/Footer";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -327,6 +328,7 @@ function App() {
         <Route path="/special" element={<SpecialEvents />} />
         <Route path="/profile" element={<UserProfile userData={currentUser} />} />
       </Routes>
+      <Footer/>
     </Router>
   );
 }

@@ -305,14 +305,23 @@ class Task extends Component {
   handleDeleteTask = async () => {
     const { tasks, editedTask } = this.state;
     try {
+      const authToken = localStorage.getItem('authToken');
+
       // Delete task from the backend
-      await axios.delete(`http://localhost:3001/reminders/${editedTask.id}`);
+      await axios.delete(`http://localhost:3001/reminders/${editedTask.id}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`, // Include the auth token in the request headers
+          Accept: 'application/json' // Specify that you expect JSON data
+        }
+      });
+      
       const updatedTasks = tasks.filter((task) => task.id !== editedTask.id);
       this.setState({ tasks: updatedTasks, isPopupOpen: false });
     } catch (error) {
       console.error("Error deleting task:", error);
     }
   };
+  
 
   render() {
     const { search, tasks, activeTask, isPopupOpen, editedTask } = this.state;

@@ -16,18 +16,16 @@ const Home = ({ currentUser }) => {
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [completed, setCompleted] = useState(false); // New state variable to track completion
   const now = new Date();
-const currentHour = now.getHours();
-let greeting = "";
+  const currentHour = now.getHours();
+  let greeting = "";
 
-if (currentHour < 12) {
-  greeting = "Good morning";
-} else if (currentHour < 18) {
-  greeting = "Good afternoon";
-} else {
-  greeting = "Good evening";
-}
-
-
+  if (currentHour < 12) {
+    greeting = "Good morning";
+  } else if (currentHour < 18) {
+    greeting = "Good afternoon";
+  } else {
+    greeting = "Good evening";
+  }
 
   const currentDate = new Date(); // This gets the current date and time in UTC
   const localCurrentDate = new Date(
@@ -94,8 +92,6 @@ if (currentHour < 12) {
     fetchTasks(); // Fetch incomplete tasks
     loadCompletedTasks(); // Fetch completed tasks
   }, []); // Empty dependency array to run this effect only once when the component mounts
-    
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -399,14 +395,14 @@ if (currentHour < 12) {
             <p className="text-gray-200">You have no upcoming tasks.</p>
           </div>
         ) : null}
-        
+
         <h1 className="text-2xl md:text-4xl font-semibold mb-1 mt-4 text-center text-gray-800">
-    {greeting},{" "}
-    <span className="text-purple-600 font-bold">
-      {currentUser ? currentUser.name : "Guest"}
-    </span>
-    !
-  </h1>
+          {greeting},{" "}
+          <span className="text-purple-600 font-bold">
+            {currentUser ? currentUser.name : "Guest"}
+          </span>
+          !
+        </h1>
         <p className="text-gray-600 text-lg md:text-xl mb-4 text-center">
           Stay organized and boost your productivity!
         </p>
@@ -511,19 +507,17 @@ if (currentHour < 12) {
             Calendar
           </h2>
           <div className="calendar-grid bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-4 shadow-md xl:w-3/4 mx-auto">
-  <Calendar
-    onChange={setSelectedDay}
-    value={selectedDay}
-    className="w-full border border-gray-200 xl:w-auto"
-    tileClassName={({ date, view }) =>
-      view === "month" && date.getDate() === selectedDay.getDate()
-        ? "selected-day"
-        : "normal-day"
-    }
-  />
-</div>
-
-
+            <Calendar
+              onChange={setSelectedDay}
+              value={selectedDay}
+              className="w-full border border-gray-200 xl:w-auto"
+              tileClassName={({ date, view }) =>
+                view === "month" && date.getDate() === selectedDay.getDate()
+                  ? "selected-day"
+                  : "normal-day"
+              }
+            />
+          </div>
 
           {tasks
             .filter(
@@ -621,69 +615,70 @@ if (currentHour < 12) {
           </div>
         </div> */}
         <div className="mt-8">
-        <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Notifications</h2>
+          <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
+            Notifications
+          </h2>
 
-  <div className="space-y-6">
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
-      <ul className="space-y-2">
-        {tasks
-          .filter((task) => new Date(task.due_date) < new Date())
-          .slice(-4)
-          .map((task, index) => (
-            <li
-              key={index}
-              className="bg-red-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-            >
-              <span className="text-red-600">
-                You missed the task: {task.title}
-              </span>
-              <button className="text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
-                Reschedule
-              </button>
-            </li>
-          ))}
-      </ul>
-    </div>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
+              <ul className="space-y-2">
+                {tasks
+                  .filter((task) => new Date(task.due_date) < new Date())
+                  .slice(-4)
+                  .map((task, index) => (
+                    <li
+                      key={index}
+                      className="bg-red-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+                    >
+                      <span className="text-red-600">
+                        You missed the task: {task.title}
+                      </span>
+                      <button className="text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
+                        Reschedule
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </div>
 
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
-      <div className="completed-tasks-container max-h-72 overflow-y-auto">
-        <ul className="space-y-2">
-          {completedTasks.slice(0, 3).map((task) => (
-            <li
-              key={task.id}
-              className="completed-task bg-green-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-            >
-              <span className="text-green-600 line-through">
-                Task completed: {task.title}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
+              <div className="completed-tasks-container max-h-72 overflow-y-auto">
+                <ul className="space-y-2">
+                  {completedTasks.slice(0, 3).map((task) => (
+                    <li
+                      key={task.id}
+                      className="completed-task bg-green-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+                    >
+                      <span className="text-green-600 line-through">
+                        Task completed: {task.title}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
 
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
-      <ul className="space-y-2">
-        {tasks
-          .filter((task) => new Date(task.due_date) >= new Date())
-          .map((task, index) => (
-            <li
-              key={index}
-              className="bg-blue-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-            >
-              <span className="text-blue-600">
-                Upcoming task: {task.title}
-              </span>
-            </li>
-          ))}
-      </ul>
-    </div>
-  </div>
-</div>
-
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
+              <ul className="space-y-2">
+                {tasks
+                  .filter((task) => new Date(task.due_date) >= new Date())
+                  .map((task, index) => (
+                    <li
+                      key={index}
+                      className="bg-blue-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+                    >
+                      <span className="text-blue-600">
+                        Upcoming task: {task.title}
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
