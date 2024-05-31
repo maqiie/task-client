@@ -399,7 +399,7 @@ const Notification = ({ currentUser }) => {
       case "30_minutes":
       case "5_minutes":
         return 5000; // 5 seconds
-      case "start":
+      case "Now":
         return 2000; // 2 seconds
       default:
         return 3000; // Default to 3 seconds
