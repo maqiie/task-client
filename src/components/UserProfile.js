@@ -635,9 +635,9 @@ const UserProfile = ({ userData, onLogout }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="max-w-md mx-auto bg-gray-100 shadow-md rounded-lg px-8 pt-6 pb-8 mb-4 bg-gradient-to-r from-purple-600 to-indigo-600"
-    >
-      <div className="text-center mb-6  bg-gradient-to-r from-purple-600 to-indigo-600">
+      className="max-w-md mx-auto bg-gray-100 shadow-md  px-8 pt-6 pb-8 mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg "
+      >
+      <div className="text-center mb-6   ">
         <div className="relative inline-block">
           <div className="relative">
             <img

@@ -657,7 +657,7 @@ const CreateTask = () => {
               value={priority}
               onChange={handlePriorityChange}
               className="rounded-md border border-gray-300 p-3 focus:outline-none focus:border-blue-500 w-full sm:w-1/2 transition duration-300 ease-in-out hover:border-blue-500 appearance-none"
-            >
+            ><option value="select"> Priority</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>

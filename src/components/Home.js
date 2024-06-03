@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect, useCallback } from "react";
+import { FaTrash } from "react-icons/fa"; // Assuming you are using Font Awesome icons
 import { Link } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -19,18 +19,16 @@ const Home = ({ currentUser }) => {
   const [currentTaskTimer, setCurrentTaskTimer] = useState(null); // Define setCurrentTaskTimer
 
   const now = new Date();
-const currentHour = now.getHours();
-let greeting = "";
+  const currentHour = now.getHours();
+  let greeting = "";
 
-if (currentHour < 12) {
-  greeting = "Good morning";
-} else if (currentHour < 18) {
-  greeting = "Good afternoon";
-} else {
-  greeting = "Good evening";
-}
-
-
+  if (currentHour < 12) {
+    greeting = "Good morning";
+  } else if (currentHour < 18) {
+    greeting = "Good afternoon";
+  } else {
+    greeting = "Good evening";
+  }
 
   const currentDate = new Date(); // This gets the current date and time in UTC
   const localCurrentDate = new Date(
@@ -97,8 +95,6 @@ if (currentHour < 12) {
     fetchTasks(); // Fetch incomplete tasks
     loadCompletedTasks(); // Fetch completed tasks
   }, []); // Empty dependency array to run this effect only once when the component mounts
-    
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -123,15 +119,13 @@ if (currentHour < 12) {
     const upcoming = tasks
       .filter((task) => new Date(task.due_date).getTime() > now.getTime())
       .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-  
 
-      const ongoing = tasks.filter((task) => {
-        const dueDate = new Date(task.due_date);
-        const endTime = new Date(dueDate.getTime() + task.duration * 60000); // Convert duration to milliseconds
-        return now >= dueDate && now < endTime;
+    const ongoing = tasks.filter((task) => {
+      const dueDate = new Date(task.due_date);
+      const endTime = new Date(dueDate.getTime() + task.duration * 60000); // Convert duration to milliseconds
+      return now >= dueDate && now < endTime;
     });
-    
-  
+
     // If there's an ongoing task, set it as current task
     if (ongoing.length > 0) {
       setCurrentTask(ongoing[0]);
@@ -170,7 +164,6 @@ if (currentHour < 12) {
       }
     }
   }, [tasks]);
-  
 
   useEffect(() => {
     updateTasks();
@@ -191,20 +184,21 @@ if (currentHour < 12) {
   const calculateTimeRemaining = (endTime) => {
     const now = new Date();
     const timeDiff = endTime - now;
-  
+
     if (timeDiff <= 0) {
       return "Task is already over";
     }
-  
+
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const hours = Math.floor(
+      (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-  
+
     return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
   };
-  
-  
+
   if (currentTask) {
     const endTime = new Date(currentTask.due_date);
     const durationMilliseconds = currentTask.duration * 60000; // Convert duration to milliseconds
@@ -212,7 +206,6 @@ if (currentHour < 12) {
     const timeRemaining = calculateTimeRemaining(endTime);
     console.log("Time remaining for current task:", timeRemaining);
   }
-  
 
   const handleCompleteTask = async (reminderId) => {
     const authToken = localStorage.getItem("authToken");
@@ -303,74 +296,74 @@ if (currentHour < 12) {
   return (
     <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
       <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
-      {currentTask ? (
-  <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg border border-gray-300 border-solid">
-    <h2 className="text-lg font-semibold mb-4 md:mb-2">Current Task</h2>
-    <div className="flex flex-col md:flex-row items-center">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-12 w-12 text-yellow-400 md:mr-4 md:mb-0 mb-4 md:mb-0"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <circle
-          cx="10"
-          cy="10"
-          r="7"
-          className="fill-current text-green-400"
-        />
-      </svg>
-      <div className="flex flex-col">
-        <h3 className="text-lg font-semibold text-gray-200">
-          {currentTask.title ? currentTask.title : "No Title"}
-        </h3>
-        <div className="flex flex-wrap items-center mt-2">
-          <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
-            Due:{" "}
-            <span className="text-gray-200">
-              {currentTask.due_date
-                ? new Date(currentTask.due_date).toLocaleDateString()
-                : "No Due Date"}
-            </span>
-          </p>
-          <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
-            Priority:{" "}
-            <span className="text-gray-200">
-              {currentTask.priority
-                ? currentTask.priority
-                : "No Priority"}
-            </span>
-          </p>
-          <p className="text-xs text-gray-300 mb-2 md:mb-0">
-            Duration:{" "}
-            <span className="text-gray-200">
-              {currentTask.duration
-                ? currentTask.duration
-                : "No Duration"}
-            </span>
-          </p>
-          {currentTask.due_date ? (
-            <p className="text-xs text-gray-300">
-              Time Remaining:{" "}
-              <span className="text-gray-200">
-                {calculateTimeRemaining(
-                  new Date(currentTask.due_date).getTime() + currentTask.duration * 60000
-                )}
-              </span>
-            </p>
-          ) : null}
-        </div>
-        <button
-          onClick={() => handleCompleteTask(currentTask.id)}
-          className="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 transition duration-300"
-        >
-          Complete
-        </button>
-      </div>
-    </div>
-  </div>
-      )
-        : upcomingTask ? (
+        {currentTask ? (
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg border border-gray-300 border-solid">
+            <h2 className="text-lg font-semibold mb-4 md:mb-2">Current Task</h2>
+            <div className="flex flex-col md:flex-row items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-12 w-12 text-yellow-400 md:mr-4 md:mb-0 mb-4 md:mb-0"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <circle
+                  cx="10"
+                  cy="10"
+                  r="7"
+                  className="fill-current text-green-400"
+                />
+              </svg>
+              <div className="flex flex-col">
+                <h3 className="text-lg font-semibold text-gray-200">
+                  {currentTask.title ? currentTask.title : "No Title"}
+                </h3>
+                <div className="flex flex-wrap items-center mt-2">
+                  <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
+                    Due:{" "}
+                    <span className="text-gray-200">
+                      {currentTask.due_date
+                        ? new Date(currentTask.due_date).toLocaleDateString()
+                        : "No Due Date"}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
+                    Priority:{" "}
+                    <span className="text-gray-200">
+                      {currentTask.priority
+                        ? currentTask.priority
+                        : "No Priority"}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-300 mb-2 md:mb-0">
+                    Duration:{" "}
+                    <span className="text-gray-200">
+                      {currentTask.duration
+                        ? currentTask.duration
+                        : "No Duration"}
+                    </span>
+                  </p>
+                  {currentTask.due_date ? (
+                    <p className="text-xs text-gray-300">
+                      Time Remaining:{" "}
+                      <span className="text-gray-200">
+                        {calculateTimeRemaining(
+                          new Date(currentTask.due_date).getTime() +
+                            currentTask.duration * 60000
+                        )}
+                      </span>
+                    </p>
+                  ) : null}
+                </div>
+                <button
+                  onClick={() => handleCompleteTask(currentTask.id)}
+                  className="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 transition duration-300"
+                >
+                  Complete
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : upcomingTask ? (
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg">
             <h2 className="text-lg font-semibold mb-4 md:mb-2">
               Upcoming Task
@@ -422,14 +415,14 @@ if (currentHour < 12) {
             <p className="text-gray-200">You have no upcoming tasks.</p>
           </div>
         ) : null}
-        
+
         <h1 className="text-2xl md:text-4xl font-semibold mb-1 mt-4 text-center text-gray-800">
-    {greeting},{" "}
-    <span className="text-purple-600 font-bold">
-      {currentUser ? currentUser.name : "Guest"}
-    </span>
-    !
-  </h1>
+          {greeting},{" "}
+          <span className="text-purple-600 font-bold">
+            {currentUser ? currentUser.name : "Guest"}
+          </span>
+          !
+        </h1>
         <p className="text-gray-600 text-lg md:text-xl mb-4 text-center">
           Stay organized and boost your productivity!
         </p>
@@ -534,19 +527,17 @@ if (currentHour < 12) {
             Calendar
           </h2>
           <div className="calendar-grid bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-4 shadow-md xl:w-3/4 mx-auto">
-  <Calendar
-    onChange={setSelectedDay}
-    value={selectedDay}
-    className="w-full border border-gray-200 xl:w-auto"
-    tileClassName={({ date, view }) =>
-      view === "month" && date.getDate() === selectedDay.getDate()
-        ? "selected-day"
-        : "normal-day"
-    }
-  />
-</div>
-
-
+            <Calendar
+              onChange={setSelectedDay}
+              value={selectedDay}
+              className="w-full border border-gray-200 xl:w-auto"
+              tileClassName={({ date, view }) =>
+                view === "month" && date.getDate() === selectedDay.getDate()
+                  ? "selected-day"
+                  : "normal-day"
+              }
+            />
+          </div>
 
           {tasks
             .filter(
@@ -568,12 +559,19 @@ if (currentHour < 12) {
                     </div>
                     <p className="text-gray-600 mt-2">{task.description}</p>
                     <div className="flex justify-end mt-2">
-                      <button className="text-sm text-white bg-blue-500 px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none">
+                      {/* <button className="text-sm text-white bg-blue-500 px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none">
                         Edit
-                      </button>
-                      <button className="ml-2 text-sm text-white bg-red-500 px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none">
-                        Delete
-                      </button>
+                      </button> */}
+                      <button 
+  onClick={() => handleDeleteClick(task.id)} 
+  className="flex items-center text-sm text-white bg-red-500 px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm5 12a1 1 0 01-2 0V8a1 1 0 112 0v9zm4 0a1 1 0 102 0V8a1 1 0 10-2 0v9z" clipRule="evenodd" />
+  </svg>
+  Delete
+</button>
+
                     </div>
                   </li>
                 </ul>
@@ -644,69 +642,70 @@ if (currentHour < 12) {
           </div>
         </div> */}
         <div className="mt-8">
-        <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Notifications</h2>
+          <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
+            Notifications
+          </h2>
 
-  <div className="space-y-6">
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
-      <ul className="space-y-2">
-        {tasks
-          .filter((task) => new Date(task.due_date) < new Date())
-          .slice(-4)
-          .map((task, index) => (
-            <li
-              key={index}
-              className="bg-red-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-            >
-              <span className="text-red-600">
-                You missed the task: {task.title}
-              </span>
-              <button className="text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
-                Reschedule
-              </button>
-            </li>
-          ))}
-      </ul>
-    </div>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
+              <ul className="space-y-2">
+                {tasks
+                  .filter((task) => new Date(task.due_date) < new Date())
+                  .slice(-4)
+                  .map((task, index) => (
+                    <li
+                      key={index}
+                      className="bg-red-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+                    >
+                      <span className="text-red-600">
+                        You missed the task: {task.title}
+                      </span>
+                      <button className="text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
+                        Reschedule
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </div>
 
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
-      <div className="completed-tasks-container max-h-72 overflow-y-auto">
-        <ul className="space-y-2">
-          {completedTasks.slice(0, 3).map((task) => (
-            <li
-              key={task.id}
-              className="completed-task bg-green-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-            >
-              <span className="text-green-600 line-through">
-                Task completed: {task.title}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
+              <div className="completed-tasks-container max-h-72 overflow-y-auto">
+                <ul className="space-y-2">
+                  {completedTasks.slice(0, 3).map((task) => (
+                    <li
+                      key={task.id}
+                      className="completed-task bg-green-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+                    >
+                      <span className="text-green-600 line-through">
+                        Task completed: {task.title}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
 
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
-      <ul className="space-y-2">
-        {tasks
-          .filter((task) => new Date(task.due_date) >= new Date())
-          .map((task, index) => (
-            <li
-              key={index}
-              className="bg-blue-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-            >
-              <span className="text-blue-600">
-                Upcoming task: {task.title}
-              </span>
-            </li>
-          ))}
-      </ul>
-    </div>
-  </div>
-</div>
-
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
+              <ul className="space-y-2">
+                {tasks
+                  .filter((task) => new Date(task.due_date) >= new Date())
+                  .map((task, index) => (
+                    <li
+                      key={index}
+                      className="bg-blue-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+                    >
+                      <span className="text-blue-600">
+                        Upcoming task: {task.title}
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
