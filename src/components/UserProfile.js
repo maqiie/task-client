@@ -1,4 +1,3 @@
-
 // import React, { useState } from "react";
 // import axios from "axios";
 // import { motion } from "framer-motion";
@@ -244,8 +243,6 @@
 
 // import 'react-notifications-component/dist/theme.css';;
 
-
-
 // const UserProfile = ({ userData, onLogout }) => {
 //   const [formData, setFormData] = useState({
 //     name: userData?.name || "",
@@ -255,9 +252,6 @@
 //     role: userData?.role || "",
 //     uid: userData?.uid || "",
 //   });
-
-
-  
 
 //   const calculateDaysUntilBirthday = () => {
 //     if (!formData.birthday) return null;
@@ -286,7 +280,6 @@
 //     setFormData({ ...formData, [name]: value });
 //   };
 
-  
 //   // const handleSubmit = async (e) => {
 //   //   e.preventDefault();
 //   //   try {
@@ -298,7 +291,7 @@
 //   //     formDataWithImage.append('user[role]', formData.role);
 //   //     formDataWithImage.append('user[uid]', formData.uid);
 //   //     formDataWithImage.append('image', formData.image);
-  
+
 //   //     const response = await axios.patch(
 //   //       "http://localhost:3001/auth",
 //   //       formDataWithImage,
@@ -365,7 +358,7 @@
 //       });
 //     }
 //   };
-  
+
 //   const handleImageChange = (e) => {
 //     const file = e.target.files[0];
 //     setFormData({ ...formData, image: file });
@@ -557,7 +550,7 @@
 
 //       </div>
 //     </motion.div>
-    
+
 //   );
 // };
 
@@ -565,8 +558,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const UserProfile = ({ userData, onLogout }) => {
   const [formData, setFormData] = useState({
@@ -605,20 +598,20 @@ const UserProfile = ({ userData, onLogout }) => {
     e.preventDefault();
     try {
       const formDataWithImage = new FormData();
-      formDataWithImage.append('user[name]', formData.name);
-      formDataWithImage.append('user[nickname]', formData.nickname);
-      formDataWithImage.append('user[email]', formData.email);
-      formDataWithImage.append('user[birthday]', formData.birthday);
-      formDataWithImage.append('user[role]', formData.role);
-      formDataWithImage.append('user[uid]', formData.uid);
-      formDataWithImage.append('image', formData.image);
-  
+      formDataWithImage.append("user[name]", formData.name);
+      formDataWithImage.append("user[nickname]", formData.nickname);
+      formDataWithImage.append("user[email]", formData.email);
+      formDataWithImage.append("user[birthday]", formData.birthday);
+      formDataWithImage.append("user[role]", formData.role);
+      formDataWithImage.append("user[uid]", formData.uid);
+      formDataWithImage.append("image", formData.image);
+
       await axios.patch("http://localhost:3001/auth", formDataWithImage, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
       });
-  
+
       toast.success("Profile updated successfully", {
         position: "top-center",
         autoClose: 2000,
@@ -642,66 +635,71 @@ const UserProfile = ({ userData, onLogout }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="max-w-md mx-auto bg-gray-100 shadow-md rounded-lg px-8 pt-6 pb-8 mb-4"
+      className="max-w-md mx-auto bg-gray-100 shadow-md rounded-lg px-8 pt-6 pb-8 mb-4 bg-gradient-to-r from-purple-600 to-indigo-600"
     >
- <div className="text-center mb-6">
-  <div className="relative inline-block">
-    <div className="relative">
-      <img
-        className="mx-auto w-24 h-24 rounded-full mb-4 border-4 border-white"
-        src={formData.image ? URL.createObjectURL(formData.image) : "placeholder.png"}
-        alt="User profile"
-      />
-      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-        <label htmlFor="imageUpload">
-          <svg
-            className="w-12 h-12 text-white cursor-pointer"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+      <div className="text-center mb-6  bg-gradient-to-r from-purple-600 to-indigo-600">
+        <div className="relative inline-block">
+          <div className="relative">
+            <img
+              className="mx-auto w-24 h-24 rounded-full mb-4 border-4 border-white"
+              src={
+                formData.image
+                  ? URL.createObjectURL(formData.image)
+                  : "placeholder.png"
+              }
+              alt="User profile"
             />
-          </svg>
-        </label>
-        <input
-          id="imageUpload"
-          name="image"
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleImageChange}
-        />
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+              <label htmlFor="imageUpload">
+                <svg
+                  className="w-12 h-12 text-white cursor-pointer"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+              </label>
+              <input
+                id="imageUpload"
+                name="image"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+            </div>
+          </div>
+        </div>
+        <h2 className="text-3xl font-semibold text-gray-800 mb-2">
+          {formData.name}
+        </h2>
+        <p className="text-gray-200 mb-2">{formData.email}</p>
+        <p className="text-gray-200 mb-2">Nickname: {formData.nickname}</p>
+        {formData.birthday ? (
+          <>
+            <p className="text-gray-200 mb-2">
+              Birthday:{" "}
+              {new Date(formData.birthday).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+            <p className="text-gray-200 mb-2">
+              Days until birthday: {calculateDaysUntilBirthday()}
+            </p>
+          </>
+        ) : (
+          <p className="text-gray-200 mb-2">
+            No birthday set. Please set your birthday.
+          </p>
+        )}
       </div>
-    </div>
-  </div>
-  <h2 className="text-3xl font-semibold text-gray-800 mb-2">{formData.name}</h2>
-  <p className="text-gray-600 mb-2">{formData.email}</p>
-  <p className="text-gray-600 mb-2">Nickname: {formData.nickname}</p>
-  {formData.birthday ? (
-    <>
-      <p className="text-gray-600 mb-2">
-        Birthday:{" "}
-        {new Date(formData.birthday).toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-        })}
-      </p>
-      <p className="text-gray-600 mb-2">
-        Days until birthday: {calculateDaysUntilBirthday()}
-      </p>
-    </>
-  ) : (
-    <p className="text-gray-600 mb-2">
-      No birthday set. Please set your birthday.
-    </p>
-  )}
-</div>
-
 
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

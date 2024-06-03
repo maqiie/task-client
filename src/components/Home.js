@@ -124,14 +124,6 @@ if (currentHour < 12) {
       .filter((task) => new Date(task.due_date).getTime() > now.getTime())
       .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
   
-    // Find the ongoing task
-    // const ongoing = tasks
-    //   .filter((task) => {
-    //     const dueDate = new Date(task.due_date);
-    //     const endTime = calculateEndTime(dueDate, task.duration);
-    //     return now >= dueDate && now < endTime;
-    //   })
-    //   .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
 
       const ongoing = tasks.filter((task) => {
         const dueDate = new Date(task.due_date);
@@ -311,75 +303,74 @@ if (currentHour < 12) {
   return (
     <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
       <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
-        {currentTask ? (
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg">
-            <h2 className="text-lg font-semibold mb-4 md:mb-2">Current Task</h2>
-            <div className="flex flex-col md:flex-row items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 text-yellow-400 md:mr-4 md:mb-0 mb-4 md:mb-0"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <circle
-                  cx="10"
-                  cy="10"
-                  r="7"
-                  className="fill-current text-green-400"
-                />
-              </svg>
-              <div className="flex flex-col">
-                <h3 className="text-lg font-semibold text-gray-200">
-                  {currentTask.title ? currentTask.title : "No Title"}
-                </h3>
-                <div className="flex flex-wrap items-center mt-2">
-                  <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
-                    Due:{" "}
-                    <span className="text-gray-200">
-                      {currentTask.due_date
-                        ? new Date(currentTask.due_date).toLocaleDateString()
-                        : "No Due Date"}
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
-                    Priority:{" "}
-                    <span className="text-gray-200">
-                      {currentTask.priority
-                        ? currentTask.priority
-                        : "No Priority"}
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-300 mb-2 md:mb-0">
-                    Duration:{" "}
-                    <span className="text-gray-200">
-                      {currentTask.duration
-                        ? currentTask.duration
-                        : "No Duration"}
-                    </span>
-                  </p>
-                  {currentTask.due_date ? (
-                  <p className="text-xs text-gray-300">
-                  Time Remaining:{" "}
-                  <span className="text-gray-200">
-                    {calculateTimeRemaining(
-                      new Date(currentTask.due_date).getTime() + currentTask.duration * 60000
-                    )}
-                  </span>
-                </p>
-                
-                 
-                  ) : null}
-                </div>
-                <button
-                  onClick={() => handleCompleteTask(currentTask.id)}
-                  className="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 transition duration-300"
-                >
-                  Complete
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : upcomingTask ? (
+      {currentTask ? (
+  <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg border border-gray-300 border-solid">
+    <h2 className="text-lg font-semibold mb-4 md:mb-2">Current Task</h2>
+    <div className="flex flex-col md:flex-row items-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-12 w-12 text-yellow-400 md:mr-4 md:mb-0 mb-4 md:mb-0"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <circle
+          cx="10"
+          cy="10"
+          r="7"
+          className="fill-current text-green-400"
+        />
+      </svg>
+      <div className="flex flex-col">
+        <h3 className="text-lg font-semibold text-gray-200">
+          {currentTask.title ? currentTask.title : "No Title"}
+        </h3>
+        <div className="flex flex-wrap items-center mt-2">
+          <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
+            Due:{" "}
+            <span className="text-gray-200">
+              {currentTask.due_date
+                ? new Date(currentTask.due_date).toLocaleDateString()
+                : "No Due Date"}
+            </span>
+          </p>
+          <p className="text-xs text-gray-300 mr-4 mb-2 md:mb-0 md:mr-8">
+            Priority:{" "}
+            <span className="text-gray-200">
+              {currentTask.priority
+                ? currentTask.priority
+                : "No Priority"}
+            </span>
+          </p>
+          <p className="text-xs text-gray-300 mb-2 md:mb-0">
+            Duration:{" "}
+            <span className="text-gray-200">
+              {currentTask.duration
+                ? currentTask.duration
+                : "No Duration"}
+            </span>
+          </p>
+          {currentTask.due_date ? (
+            <p className="text-xs text-gray-300">
+              Time Remaining:{" "}
+              <span className="text-gray-200">
+                {calculateTimeRemaining(
+                  new Date(currentTask.due_date).getTime() + currentTask.duration * 60000
+                )}
+              </span>
+            </p>
+          ) : null}
+        </div>
+        <button
+          onClick={() => handleCompleteTask(currentTask.id)}
+          className="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 transition duration-300"
+        >
+          Complete
+        </button>
+      </div>
+    </div>
+  </div>
+      )
+        : upcomingTask ? (
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg">
             <h2 className="text-lg font-semibold mb-4 md:mb-2">
               Upcoming Task
