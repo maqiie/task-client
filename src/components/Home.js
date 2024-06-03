@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Calendar from "react-calendar";
@@ -15,17 +16,21 @@ const Home = ({ currentUser }) => {
   const [currentTask, setCurrentTask] = useState(null);
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [completed, setCompleted] = useState(false); // New state variable to track completion
-  const now = new Date();
-  const currentHour = now.getHours();
-  let greeting = "";
+  const [currentTaskTimer, setCurrentTaskTimer] = useState(null); // Define setCurrentTaskTimer
 
-  if (currentHour < 12) {
-    greeting = "Good morning";
-  } else if (currentHour < 18) {
-    greeting = "Good afternoon";
-  } else {
-    greeting = "Good evening";
-  }
+  const now = new Date();
+const currentHour = now.getHours();
+let greeting = "";
+
+if (currentHour < 12) {
+  greeting = "Good morning";
+} else if (currentHour < 18) {
+  greeting = "Good afternoon";
+} else {
+  greeting = "Good evening";
+}
+
+
 
   const currentDate = new Date(); // This gets the current date and time in UTC
   const localCurrentDate = new Date(
@@ -92,6 +97,8 @@ const Home = ({ currentUser }) => {
     fetchTasks(); // Fetch incomplete tasks
     loadCompletedTasks(); // Fetch completed tasks
   }, []); // Empty dependency array to run this effect only once when the component mounts
+    
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -113,36 +120,65 @@ const Home = ({ currentUser }) => {
 
   const updateTasks = useCallback(() => {
     const now = new Date();
-    console.log("Updating tasks at", now);
-
     const upcoming = tasks
       .filter((task) => new Date(task.due_date).getTime() > now.getTime())
       .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+  
+    // Find the ongoing task
+    // const ongoing = tasks
+    //   .filter((task) => {
+    //     const dueDate = new Date(task.due_date);
+    //     const endTime = calculateEndTime(dueDate, task.duration);
+    //     return now >= dueDate && now < endTime;
+    //   })
+    //   .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
 
-    const ongoing = tasks
-      .filter((task) => {
+      const ongoing = tasks.filter((task) => {
         const dueDate = new Date(task.due_date);
-        const endTime = calculateEndTime(dueDate, task.duration);
+        const endTime = new Date(dueDate.getTime() + task.duration * 60000); // Convert duration to milliseconds
         return now >= dueDate && now < endTime;
-      })
-      .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-
+    });
+    
+  
+    // If there's an ongoing task, set it as current task
     if (ongoing.length > 0) {
       setCurrentTask(ongoing[0]);
       setUpcomingTask(
         upcoming[0] && ongoing[0].id !== upcoming[0].id ? upcoming[0] : null
       );
-    } else if (upcoming.length > 0) {
-      setCurrentTask(null);
-      setUpcomingTask(upcoming[0]);
     } else {
-      setCurrentTask(null);
-      setUpcomingTask(null);
+      // If no ongoing task, check for upcoming tasks
+      if (upcoming.length > 0) {
+        // Check if upcoming task's due time has arrived
+        if (new Date(upcoming[0].due_date).getTime() <= now.getTime()) {
+          // Set upcoming task as current task
+          setCurrentTask(upcoming[0]);
+          // Calculate end time for the upcoming task
+          const endTime = calculateEndTime(
+            new Date(upcoming[0].due_date),
+            upcoming[0].duration
+          );
+          // Schedule a function to unset the current task after its duration
+          const timer = setTimeout(() => {
+            setCurrentTask(null);
+          }, endTime.getTime() - now.getTime());
+          // Save the timer reference so it can be cleared later if needed
+          setCurrentTaskTimer(timer);
+          // Set the next upcoming task if available
+          setUpcomingTask(upcoming[1] || null);
+        } else {
+          // If upcoming task's due time hasn't arrived yet, set it as upcoming task
+          setCurrentTask(null);
+          setUpcomingTask(upcoming[0]);
+        }
+      } else {
+        // If no ongoing or upcoming tasks, set both to null
+        setCurrentTask(null);
+        setUpcomingTask(null);
+      }
     }
-
-    console.log("Current task:", currentTask);
-    console.log("Upcoming task:", upcomingTask);
-  }, [tasks, currentTask, upcomingTask]);
+  }, [tasks]);
+  
 
   useEffect(() => {
     updateTasks();
@@ -162,28 +198,29 @@ const Home = ({ currentUser }) => {
 
   const calculateTimeRemaining = (endTime) => {
     const now = new Date();
-    const diff = endTime - now;
-
-    if (diff <= 0) {
+    const timeDiff = endTime - now;
+  
+    if (timeDiff <= 0) {
       return "Task is already over";
     }
-
-    const seconds = Math.floor((diff / 1000) % 60);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
+  
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+  
     return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
   };
-
+  
+  
   if (currentTask) {
-    const endTime = calculateEndTime(
-      new Date(currentTask.due_date),
-      currentTask.duration
-    );
+    const endTime = new Date(currentTask.due_date);
+    const durationMilliseconds = currentTask.duration * 60000; // Convert duration to milliseconds
+    endTime.setTime(endTime.getTime() + durationMilliseconds); // Add duration to the due date
     const timeRemaining = calculateTimeRemaining(endTime);
     console.log("Time remaining for current task:", timeRemaining);
   }
+  
 
   const handleCompleteTask = async (reminderId) => {
     const authToken = localStorage.getItem("authToken");
@@ -321,17 +358,16 @@ const Home = ({ currentUser }) => {
                     </span>
                   </p>
                   {currentTask.due_date ? (
-                    <p className="text-xs text-gray-300">
-                      Time Remaining:{" "}
-                      <span className="text-gray-200">
-                        {calculateTimeRemaining(
-                          calculateEndTime(
-                            new Date(currentTask.due_date),
-                            currentTask.duration
-                          )
-                        )}
-                      </span>
-                    </p>
+                  <p className="text-xs text-gray-300">
+                  Time Remaining:{" "}
+                  <span className="text-gray-200">
+                    {calculateTimeRemaining(
+                      new Date(currentTask.due_date).getTime() + currentTask.duration * 60000
+                    )}
+                  </span>
+                </p>
+                
+                 
                   ) : null}
                 </div>
                 <button
@@ -395,14 +431,14 @@ const Home = ({ currentUser }) => {
             <p className="text-gray-200">You have no upcoming tasks.</p>
           </div>
         ) : null}
-
+        
         <h1 className="text-2xl md:text-4xl font-semibold mb-1 mt-4 text-center text-gray-800">
-          {greeting},{" "}
-          <span className="text-purple-600 font-bold">
-            {currentUser ? currentUser.name : "Guest"}
-          </span>
-          !
-        </h1>
+    {greeting},{" "}
+    <span className="text-purple-600 font-bold">
+      {currentUser ? currentUser.name : "Guest"}
+    </span>
+    !
+  </h1>
         <p className="text-gray-600 text-lg md:text-xl mb-4 text-center">
           Stay organized and boost your productivity!
         </p>
@@ -507,17 +543,19 @@ const Home = ({ currentUser }) => {
             Calendar
           </h2>
           <div className="calendar-grid bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-4 shadow-md xl:w-3/4 mx-auto">
-            <Calendar
-              onChange={setSelectedDay}
-              value={selectedDay}
-              className="w-full border border-gray-200 xl:w-auto"
-              tileClassName={({ date, view }) =>
-                view === "month" && date.getDate() === selectedDay.getDate()
-                  ? "selected-day"
-                  : "normal-day"
-              }
-            />
-          </div>
+  <Calendar
+    onChange={setSelectedDay}
+    value={selectedDay}
+    className="w-full border border-gray-200 xl:w-auto"
+    tileClassName={({ date, view }) =>
+      view === "month" && date.getDate() === selectedDay.getDate()
+        ? "selected-day"
+        : "normal-day"
+    }
+  />
+</div>
+
+
 
           {tasks
             .filter(
@@ -615,70 +653,69 @@ const Home = ({ currentUser }) => {
           </div>
         </div> */}
         <div className="mt-8">
-          <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-            Notifications
-          </h2>
+        <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Notifications</h2>
 
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
-              <ul className="space-y-2">
-                {tasks
-                  .filter((task) => new Date(task.due_date) < new Date())
-                  .slice(-4)
-                  .map((task, index) => (
-                    <li
-                      key={index}
-                      className="bg-red-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-                    >
-                      <span className="text-red-600">
-                        You missed the task: {task.title}
-                      </span>
-                      <button className="text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
-                        Reschedule
-                      </button>
-                    </li>
-                  ))}
-              </ul>
-            </div>
+  <div className="space-y-6">
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
+      <ul className="space-y-2">
+        {tasks
+          .filter((task) => new Date(task.due_date) < new Date())
+          .slice(-4)
+          .map((task, index) => (
+            <li
+              key={index}
+              className="bg-red-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+            >
+              <span className="text-red-600">
+                You missed the task: {task.title}
+              </span>
+              <button className="text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
+                Reschedule
+              </button>
+            </li>
+          ))}
+      </ul>
+    </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
-              <div className="completed-tasks-container max-h-72 overflow-y-auto">
-                <ul className="space-y-2">
-                  {completedTasks.slice(0, 3).map((task) => (
-                    <li
-                      key={task.id}
-                      className="completed-task bg-green-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-                    >
-                      <span className="text-green-600 line-through">
-                        Task completed: {task.title}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
+      <div className="completed-tasks-container max-h-72 overflow-y-auto">
+        <ul className="space-y-2">
+          {completedTasks.slice(0, 3).map((task) => (
+            <li
+              key={task.id}
+              className="completed-task bg-green-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+            >
+              <span className="text-green-600 line-through">
+                Task completed: {task.title}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
-              <ul className="space-y-2">
-                {tasks
-                  .filter((task) => new Date(task.due_date) >= new Date())
-                  .map((task, index) => (
-                    <li
-                      key={index}
-                      className="bg-blue-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-                    >
-                      <span className="text-blue-600">
-                        Upcoming task: {task.title}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
+      <ul className="space-y-2">
+        {tasks
+          .filter((task) => new Date(task.due_date) >= new Date())
+          .map((task, index) => (
+            <li
+              key={index}
+              className="bg-blue-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
+            >
+              <span className="text-blue-600">
+                Upcoming task: {task.title}
+              </span>
+            </li>
+          ))}
+      </ul>
+    </div>
+  </div>
+</div>
+
       </div>
     </div>
   );
