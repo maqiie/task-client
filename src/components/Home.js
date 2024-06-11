@@ -80,6 +80,35 @@ const Home = ({ currentUser }) => {
     }
   };
 
+  const fetchSpecialEvents = async () => {
+    const authToken = localStorage.getItem("authToken");
+
+    try {
+      const response = await axios.get("http://localhost:3001/reminders", {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          Accept: "application/json",
+        },
+      });
+
+      // Filter special events from the response data
+      const specialEventsData = response.data.filter(
+        (event) => event.is_special_event
+      );
+
+      // Log the filtered special events data to verify
+      console.log("Special Events Data:", specialEventsData);
+
+      // Set the filtered special events in state
+      setSpecialEvents(specialEventsData);
+    } catch (error) {
+      console.error("Error fetching special events:", error);
+    }
+  };
+  useEffect(() => {
+    fetchSpecialEvents();
+  }, []);
+
   // Example usage of fetchCompletedTasks:
   const loadCompletedTasks = async () => {
     try {
@@ -263,9 +292,9 @@ const Home = ({ currentUser }) => {
     setShowPopup(false);
   };
   const handleDeleteClick = async (reminderId) => {
-    const authToken = localStorage.getItem("authToken");
-
     try {
+      const authToken = localStorage.getItem("authToken");
+
       await axios.delete(`http://localhost:3001/reminders/${reminderId}`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -292,6 +321,7 @@ const Home = ({ currentUser }) => {
     const newEvent = { date, name };
     setSpecialEvents([...specialEvents, newEvent]);
   };
+  
 
   return (
     <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
@@ -562,85 +592,31 @@ const Home = ({ currentUser }) => {
                       {/* <button className="text-sm text-white bg-blue-500 px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none">
                         Edit
                       </button> */}
-                      <button 
-  onClick={() => handleDeleteClick(task.id)} 
-  className="flex items-center text-sm text-white bg-red-500 px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300"
->
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-    <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm5 12a1 1 0 01-2 0V8a1 1 0 112 0v9zm4 0a1 1 0 102 0V8a1 1 0 10-2 0v9z" clipRule="evenodd" />
-  </svg>
-  Delete
-</button>
-
+                      <button
+                        onClick={() => handleDeleteClick(task.id)}
+                        className="flex items-center text-sm text-white bg-red-500 px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 mr-2"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M3 5a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm5 12a1 1 0 01-2 0V8a1 1 0 112 0v9zm4 0a1 1 0 102 0V8a1 1 0 10-2 0v9z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Delete
+                      </button>
                     </div>
                   </li>
                 </ul>
               </div>
             ))}
         </div>
-        {/* <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Notifications</h2>
 
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-2">Missed Tasks</h3>
-              <ul className="space-y-2">
-                {tasks
-                  .filter((task) => new Date(task.due_date) < new Date())
-                  .slice(-4)
-                  .map((task, index) => (
-                    <li
-                      key={index}
-                      className="bg-red-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-                    >
-                      <span className="text-red-600">
-                        You missed the task: {task.title}
-                      </span>
-                      <button className="text-sm text-gray-600 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
-                        Reschedule
-                      </button>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-2">Completed Tasks</h3>
-              <div className="completed-tasks-container max-h-72 overflow-y-auto">
-                <ul className="space-y-2">
-                  {completedTasks.slice(0, 3).map((task) => (
-                    <li
-                      key={task.id}
-                      className="completed-task bg-green-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-                    >
-                      <span className="text-green-600 line-through">
-                        Task completed: {task.title}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-2">Upcoming Tasks</h3>
-              <ul className="space-y-2">
-                {tasks
-                  .filter((task) => new Date(task.due_date) >= new Date())
-                  .map((task, index) => (
-                    <li
-                      key={index}
-                      className="bg-blue-100 rounded-lg px-4 py-3 shadow-md flex items-center justify-between"
-                    >
-                      <span className="text-blue-600">
-                        Upcoming task: {task.title}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          </div>
-        </div> */}
         <div className="mt-8">
           <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
             Notifications
@@ -704,6 +680,33 @@ const Home = ({ currentUser }) => {
                   ))}
               </ul>
             </div>
+            <div className="special-events-section mt-8 bg-gradient-to-br from-purple-200 to-purple-300 p-4 md:p-8 rounded-lg shadow-xl">
+  <h2 className="section-title text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-indigo-800">Special Events</h2>
+  {specialEvents.length > 0 ? (
+    <ul className="event-list">
+      {specialEvents.map((event, index) => {
+        console.log("Special Event:", event); // Debug output
+        return (
+          <li key={index} className="event-item bg-white rounded-lg shadow-md mb-4">
+            <a href="/special-events" className="block hover:bg-purple-100 rounded-lg p-4 md:p-6 transition duration-300">
+              <h3 className="event-name text-lg md:text-2xl font-semibold text-indigo-900 mb-1 md:mb-2">{event.title}</h3>
+              <span className="event-date text-gray-700 text-sm md:text-base">{new Date(event.due_date).toLocaleDateString()}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  ) : (
+    <p className="no-events-message text-lg text-gray-600 mt-4">No special events found.</p>
+  )}
+
+  <a href="/create" className="mt-6 md:mt-8 inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-lg shadow-md transition duration-300">
+    Create Task
+  </a>
+</div>
+
+
+
           </div>
         </div>
       </div>

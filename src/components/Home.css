@@ -54,4 +54,41 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
   }
   
-  
+  /* Custom CSS */
+.special-events-section {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.event-item {
+  transition: transform 0.3s ease-in-out;
+}
+
+.event-item:hover {
+  transform: translateY(-5px);
+}
+
+.event-name {
+  color: #4a148c; /* Dark purple */
+}
+
+.event-date {
+  color: #333; /* Dark gray */
+}
+
+.no-events-message {
+  font-style: italic;
+}
+
+/* Button */
+a[href="/create"] {
+  transition: all 0.3s ease-in-out;
+}
+
+a[href="/create"]:hover {
+  background-color: #4a148c; /* Dark purple */
+}
+
+a[href="/create"]:focus {
+  outline: none;
+}

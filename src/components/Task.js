@@ -141,7 +141,7 @@ class Task extends Component {
     const ongoingTasks = filteredTasks.filter(
       (task) => !task.completed && new Date(task.due_date) <= currentDateTime
     );
-    
+
     return (
       <div className="max-w-lg mx-auto bg-gray-100 rounded-lg shadow-md overflow-hidden">
         <h2 className="text-3xl font-bold bg-indigo-600 text-white py-4 text-center">
@@ -205,41 +205,44 @@ class Task extends Component {
           )}
         </div>
         <div className="task-container px-4 py-2">
-  <h3 className="ongoing-header text-2xl font-semibold mb-4">Ongoing Tasks</h3>
-  {ongoingTasks.length === 0 ? (
-    <p className="text-gray-500">No ongoing tasks.</p>
-  ) : (
-    ongoingTasks.map((task) => (
-      <div
-        key={task.id}
-        className={`task-item bg-white rounded-md p-4 mb-4 cursor-pointer hover:shadow-md transition duration-300 border border-gray-200`}
-        onClick={() => this.handleTaskClick(task)}
-      >
-        <h3 className="text-xl font-semibold mb-1">{task.title}</h3>
-        <p className="text-sm text-gray-600 mb-2">
-          Due Date: {new Date(task.due_date).toLocaleDateString()}{" "}
-          {new Date(task.due_date).toLocaleTimeString()}
-        </p>
-        <p className="text-sm text-gray-600 mb-2">Location: {task.location}</p>
-        <span
-          className={`priority-badge text-xs font-semibold inline-block px-2 py-1 rounded-full ${
-            task.priority === "high"
-              ? "bg-red-600 text-white"
-              : task.priority === "medium"
-              ? "bg-orange-500 text-white"
-              : "bg-green-500 text-white"
-          }`}
-        >
-          {task.priority}
-        </span>
-        <span className="ml-2 px-2 py-1 bg-yellow-500 text-white text-xs rounded-full">
-          Ongoing
-        </span>
-      </div>
-    ))
-  )}
-</div>
-
+          <h3 className="ongoing-header text-2xl font-semibold mb-4">
+            Ongoing Tasks
+          </h3>
+          {ongoingTasks.length === 0 ? (
+            <p className="text-gray-500">No ongoing tasks.</p>
+          ) : (
+            ongoingTasks.map((task) => (
+              <div
+                key={task.id}
+                className={`task-item bg-white rounded-md p-4 mb-4 cursor-pointer hover:shadow-md transition duration-300 border border-gray-200`}
+                onClick={() => this.handleTaskClick(task)}
+              >
+                <h3 className="text-xl font-semibold mb-1">{task.title}</h3>
+                <p className="text-sm text-gray-600 mb-2">
+                  Due Date: {new Date(task.due_date).toLocaleDateString()}{" "}
+                  {new Date(task.due_date).toLocaleTimeString()}
+                </p>
+                <p className="text-sm text-gray-600 mb-2">
+                  Location: {task.location}
+                </p>
+                <span
+                  className={`priority-badge text-xs font-semibold inline-block px-2 py-1 rounded-full ${
+                    task.priority === "high"
+                      ? "bg-red-600 text-white"
+                      : task.priority === "medium"
+                      ? "bg-orange-500 text-white"
+                      : "bg-green-500 text-white"
+                  }`}
+                >
+                  {task.priority}
+                </span>
+                <span className="ml-2 px-2 py-1 bg-yellow-500 text-white text-xs rounded-full">
+                  Ongoing
+                </span>
+              </div>
+            ))
+          )}
+        </div>
 
         <div className="task-container px-4 py-2">
           <h3 className="completed-header text-2xl font-semibold mb-4">

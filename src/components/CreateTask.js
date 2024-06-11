@@ -582,7 +582,7 @@ const CreateTask = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-purple-300 to-indigo-400 rounded-lg shadow-md p-6 max-w-md mx-auto border border-gray-300">
+    <div className="bg-gradient-to-r from-purple-300 to-indigo-400  shadow-md p-6 max-w-md mx-auto border border-gray-300">
       <h2 className="text-lg font-semibold mb-4 text-center text-gray-800">Create Task</h2>
       {/* Success message */}
       {successMessage && (
