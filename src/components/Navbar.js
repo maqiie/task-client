@@ -20,7 +20,7 @@ const Navbar = ({ currentUser, onLogout }) => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M3 3a2 2 0 012-2h10a2 2 0 012 2v5a2 2 0 01-2 2h-1v4l-2-2H8l-2 2V10H5a2 2 0 01-2-2V3zm2-1a1 1 0 00-1 1v5a1 1 0 001 1h1v5l3-3h4l3 3v-5h1a1 1 0 001-1V3a1 1 0 00-1-1H5z" clipRule="evenodd" />
           </svg>
-          <span className="text-lg font-semibold">Your Task App</span>
+          <span className="text-lg font-semibold">Tasker</span>
         </Link>
         <ul className="hidden lg:flex lg:space-x-4 lg:items-center">
           <li>

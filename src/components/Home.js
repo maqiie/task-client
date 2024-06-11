@@ -321,7 +321,6 @@ const Home = ({ currentUser }) => {
     const newEvent = { date, name };
     setSpecialEvents([...specialEvents, newEvent]);
   };
-  
 
   return (
     <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
@@ -681,32 +680,48 @@ const Home = ({ currentUser }) => {
               </ul>
             </div>
             <div className="special-events-section mt-8 bg-gradient-to-br from-purple-200 to-purple-300 p-4 md:p-8 rounded-lg shadow-xl">
-  <h2 className="section-title text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-indigo-800">Special Events</h2>
-  {specialEvents.length > 0 ? (
-    <ul className="event-list">
-      {specialEvents.map((event, index) => {
-        console.log("Special Event:", event); // Debug output
-        return (
-          <li key={index} className="event-item bg-white rounded-lg shadow-md mb-4">
-            <a href="/special-events" className="block hover:bg-purple-100 rounded-lg p-4 md:p-6 transition duration-300">
-              <h3 className="event-name text-lg md:text-2xl font-semibold text-indigo-900 mb-1 md:mb-2">{event.title}</h3>
-              <span className="event-date text-gray-700 text-sm md:text-base">{new Date(event.due_date).toLocaleDateString()}</span>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  ) : (
-    <p className="no-events-message text-lg text-gray-600 mt-4">No special events found.</p>
-  )}
-
-  <a href="/create" className="mt-6 md:mt-8 inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-lg shadow-md transition duration-300">
-    Create Task
-  </a>
-</div>
-
-
-
+              <h2 className="section-title text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-indigo-800">
+                Special Events
+              </h2>
+              {specialEvents.length > 0 ? (
+                <ul className="event-list">
+                  {specialEvents.map((event, index) => {
+                    return (
+                      <li
+                        key={index}
+                        className="event-item bg-white rounded-lg shadow-md mb-4"
+                      >
+                        <a
+                          href="/special-events"
+                          className="block hover:bg-purple-100 rounded-lg p-4 md:p-6 transition duration-300"
+                        >
+                          <h3 className="event-name text-lg md:text-2xl font-semibold text-indigo-900 mb-1 md:mb-2">
+                            {event.title}
+                          </h3>
+                          <span className="event-date text-gray-700 text-sm md:text-base">
+                            {new Date(event.due_date).toLocaleDateString()}
+                          </span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="no-events-message text-lg text-gray-600 mt-4">
+                  No special events found.
+                </p>
+              )}
+              <Link to="/special">
+                <button
+                  className="mt-6 md:mt-8 inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-lg shadow-md transition duration-300"
+                  onClick={() => {
+                    /* Add your onClick function here */
+                  }}
+                >
+                  Create Task
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
