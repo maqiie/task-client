@@ -1,0 +1,504 @@
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
+import "./Friend.css";
+
+const FriendSearch = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
+  const [receivedRequests, setReceivedRequests] = useState([]);
+  const [acceptedRequests, setAcceptedRequests] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [relationshipCategory, setRelationshipCategory] = useState("friend");
+  const authToken = localStorage.getItem("authToken");
+  const userId = localStorage.getItem("userId");
+
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      handleSearch();
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchSentRequests(userId);
+    fetchReceivedRequests(userId);
+    fetchAcceptedRequests(userId);
+  }, [userId]);
+
+  const handleSearch = async () => {
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `http://localhost:3001/users/search?email=${searchQuery}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setSearchResults(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error searching for friends:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const fetchSentRequests = async (userId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/friend_requests/${userId}/sent`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setSentRequests(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching sent requests:", error);
+      setSentRequests([]);
+    }
+  };
+
+  const fetchReceivedRequests = async (userId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/friend_requests/${userId}/received`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      const data = await response.json();
+      const pendingRequests = data.filter((request) => request.status === null);
+      setReceivedRequests(pendingRequests);
+    } catch (error) {
+      console.error("Error fetching received requests:", error);
+      setReceivedRequests([]);
+    }
+  };
+
+  const fetchAcceptedRequests = async (userId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/friend_requests/${userId}/accepted`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setAcceptedRequests(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching accepted requests:", error);
+      setAcceptedRequests([]);
+    }
+  };
+
+  const isFriend = (userId) => {
+    return acceptedRequests.some(
+      (request) =>
+        request.sender_id === userId || request.receiver_id === userId
+    );
+  };
+
+  const isRequestSent = (userId) => {
+    return sentRequests.some((request) => request.receiver_id === userId);
+  };
+
+  const handleSendRequest = async (friendId) => {
+    try {
+      const response = await fetch("http://localhost:3001/friend_requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          receiver_id: friendId,
+          relationship_category: relationshipCategory, // Pass the selected relationship category
+        }),
+      });
+      if (response.ok) {
+        fetchSentRequests(userId);
+      } else {
+        console.error("Failed to send friend request:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+    }
+  };
+
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/friend_requests/${requestId}/accept`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      if (response.ok) {
+        const acceptedRequest = receivedRequests.find(
+          (request) => request.id === requestId
+        );
+        setReceivedRequests(
+          receivedRequests.filter((request) => request.id !== requestId)
+        );
+        setAcceptedRequests([...acceptedRequests, acceptedRequest]);
+      } else {
+        console.error("Failed to accept friend request:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+    }
+  };
+
+  const handleDeclineRequest = async (requestId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/friend_requests/${requestId}/decline`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      if (response.ok) {
+        setReceivedRequests(
+          receivedRequests.filter((request) => request.id !== requestId)
+        );
+      } else {
+        console.error("Failed to decline friend request:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error declining friend request:", error);
+    }
+  };
+
+  const SentFriendRequests = ({ sentRequests }) => {
+    const [showAll, setShowAll] = useState(false);
+
+    const pendingRequests = sentRequests.filter(
+      (request) => request.status === null
+    );
+    const otherRequests = sentRequests.filter(
+      (request) => request.status !== null
+    );
+
+    const handleToggle = () => {
+      setShowAll(!showAll);
+    };
+
+    return (
+      <div className="mt-6">
+        <h2 className="text-lg font-semibold mb-3 text-indigo-700">
+          Sent Friend Requests
+        </h2>
+        {pendingRequests.length === 0 && otherRequests.length === 0 ? (
+          <p className="text-gray-500">No sent friend requests</p>
+        ) : (
+          <>
+            {pendingRequests.map((request) => (
+              <div key={request.id} className="border-b border-gray-300 py-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-gray-700 font-semibold">
+                      {request.receiver.name
+                        ? request.receiver.name
+                        : "Name not available"}
+                    </span>
+                    <br />
+                    <span className="text-gray-600">
+                      {request.receiver.email}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <span className="text-yellow-500 font-semibold">
+                      Pending
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {showAll && (
+              <>
+                {otherRequests.map((request) => (
+                  <div
+                    key={request.id}
+                    className="border-b border-gray-300 py-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-gray-700 font-semibold">
+                          {request.receiver.name
+                            ? request.receiver.name
+                            : "Name not available"}
+                        </span>
+                        <br />
+                        <span className="text-gray-600">
+                          {request.receiver.email}
+                        </span>
+                      </div>
+                      <div className="mt-2">
+                        {request.status === "accepted" && (
+                          <span className="text-green-500 font-semibold">
+                            Accepted
+                          </span>
+                        )}
+                        {request.status === "declined" && (
+                          <span className="text-red-500 font-semibold">
+                            Declined
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+            <button
+              onClick={handleToggle}
+              className="mt-3 text-blue-500 hover:underline"
+            >
+              {showAll ? "Show less" : "Show all"}
+            </button>
+          </>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col space-y-6 max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <div className="flex flex-col md:flex-row md:items-center border-b border-gray-300 pb-3">
+        <input
+          type="text"
+          placeholder="Search friends..."
+          className="flex-grow border border-gray-300 rounded-full px-4 py-2 mb-2 md:mb-0 md:mr-3 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 transition-shadow shadow-sm"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+
+        <button
+          className={`bg-blue-500 text-white px-4 py-2 rounded-full transition-transform transform hover:scale-105 ${
+            isSearching ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          onClick={handleSearch}
+          disabled={isSearching}
+        >
+          {isSearching ? "Searching..." : "Search"}
+        </button>
+      </div>
+
+      {isSearching && (
+        <div className="flex justify-center mt-6">
+          <div className="wrapper">
+            <div className="circle"></div>
+            <div className="circle"></div>
+            <div className="circle"></div>
+            <div className="shadow"></div>
+            <div className="shadow"></div>
+            <div className="shadow"></div>
+          </div>
+        </div>
+      )}
+
+      <div>
+        {searchResults.length > 0 && (
+          <div className="search-result-box">
+            <h2 className="text-lg font-semibold mb-3 text-indigo-700">
+              Search Results
+            </h2>
+            {searchResults.map((user) => (
+              <div key={user.id} className="border-b border-gray-300 py-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-gray-700 font-semibold">
+                      {user.name ? user.name : "Name not available"}
+                    </span>
+                    <br />
+                    <span className="text-gray-600">{user.email}</span>
+                  </div>
+                  <div className="mt-2">
+                    {isFriend(user.id) ? (
+                      <span className="text-green-500 font-semibold">
+                        Friend
+                      </span>
+                    ) : isRequestSent(user.id) ? (
+                      <span className="text-yellow-500 font-semibold">
+                        Request Sent
+                      </span>
+                    ) : (
+                      <div className="relative inline-block text-left">
+                        <button
+                          className="bg-blue-500 text-white px-3 py-1 rounded-lg"
+                          onClick={() => handleSendRequest(user.id)}
+                        >
+                          Add Friend
+                        </button>
+                        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                          <div
+                            className="py-1"
+                            role="menu"
+                            aria-orientation="vertical"
+                            aria-labelledby="options-menu"
+                          >
+                            {/* Dropdown menu for relationship category */}
+                            <button
+                              className={`block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${
+                                relationshipCategory === "friend"
+                                  ? "bg-gray-100"
+                                  : ""
+                              }`}
+                              onClick={() => setRelationshipCategory("friend")}
+                            >
+                              Friend
+                            </button>
+                            <button
+                              className={`block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${
+                                relationshipCategory === "family"
+                                  ? "bg-gray-100"
+                                  : ""
+                              }`}
+                              onClick={() => setRelationshipCategory("family")}
+                            >
+                              Family
+                            </button>
+                            <button
+                              className={`block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${
+                                relationshipCategory === "colleague"
+                                  ? "bg-gray-100"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                setRelationshipCategory("colleague")
+                              }
+                            >
+                              Colleague
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <SentFriendRequests sentRequests={sentRequests} />
+
+      <div className="friend-request-box">
+        <h2 className="text-lg font-semibold mb-3 text-indigo-700">
+          Received Friend Requests
+        </h2>
+        {receivedRequests.length === 0 ? (
+          <p className="text-gray-500">No received friend requests</p>
+        ) : (
+          receivedRequests.map((request) => (
+            <div key={request.id} className="border-b border-gray-300 py-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-gray-700 font-semibold">
+                    {request.sender.name
+                      ? request.sender.name
+                      : "Name not available"}
+                  </span>
+                  <br />
+                  <span className="text-gray-600">{request.sender.email}</span>
+                </div>
+                <div className="mt-2 flex space-x-2">
+                  <button
+                    className="bg-green-500 text-white px-3 py-1 rounded-lg"
+                    onClick={() => handleAcceptRequest(request.id)}
+                  >
+                    <FontAwesomeIcon icon={faCheck} />
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-3 py-1 rounded-lg"
+                    onClick={() => handleDeclineRequest(request.id)}
+                  >
+                    <FontAwesomeIcon icon={faTimes} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="accepted-friends-box">
+        <h2 className="text-lg font-semibold mb-3 text-indigo-700">
+          Accepted Friends
+        </h2>
+        {acceptedRequests.length === 0 ? (
+          <p className="text-gray-500">No accepted friends</p>
+        ) : (
+          acceptedRequests.map((request) => (
+            <div key={request.id} className="border-b border-gray-300 py-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between">
+                <div className="flex items-center mb-2 sm:mb-0">
+                  <div className="bg-gray-200 rounded-full h-12 w-12 flex items-center justify-center mr-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 9v3m0 0v3m0-3h3m-3 0H9m-7 8a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-700">
+                      Friend: {request.sender.name}
+                    </span>
+                    <br />
+                    <span className="text-gray-600">
+                      Email: {request.sender.email}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-gray-500">
+                  Relationship: {request.relationship_category}
+                </span>
+              </div>
+              <div className="flex justify-end mt-2">
+                {request.relationship_category === "friend" && (
+                  <span className="text-green-500 mr-2">Friend</span>
+                )}
+                {request.relationship_category === "family" && (
+                  <span className="text-blue-500 mr-2">Family</span>
+                )}
+                {request.relationship_category === "colleague" && (
+                  <span className="text-purple-500 mr-2">Colleague</span>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default FriendSearch;
