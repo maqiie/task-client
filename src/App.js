@@ -13,6 +13,8 @@ import UserProfile from "./components/UserProfile";
 import Notification from "./components/Notification"; // Import the Notification component
 import Footer from "./components/Footer";
 import FriendSearch from "./components/Friend";
+import Invitations from "./components/Invitations";
+import Loader from "./components/Loader";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -79,6 +81,8 @@ function App() {
         <Route path="/special" element={<SpecialEvents />} />
         <Route path="/profile" element={<UserProfile userData={currentUser} />} />
         <Route path="/friend" element={<FriendSearch userData={currentUser}/>} />
+        <Route path="/invitations" element={<Invitations userData={currentUser}/>}/>
+        <Route path="/loader" element={<Loader/> }/>
       </Routes>
       <Footer/>
     </Router>

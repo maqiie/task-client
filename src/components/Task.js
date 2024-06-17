@@ -147,6 +147,14 @@ class Task extends Component {
         <h2 className="text-3xl font-bold bg-indigo-600 text-white py-4 text-center">
           Task
         </h2>
+        
+        <a href="/invitations">
+  <h2 class="text-3xl font-bold bg-indigo-600 text-white py-4 text-center">
+    Invitations
+  </h2>
+</a>
+
+        
         <div className="px-4 py-2">
           <input
             type="text"
