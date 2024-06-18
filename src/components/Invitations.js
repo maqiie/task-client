@@ -1,91 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-// import { toast, ToastContainer } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
-
-// const Invitations = ({ currentUser }) => {
-//   const [invitations, setInvitations] = useState([]);
-
-//   useEffect(() => {
-//     const fetchInvitations = async () => {
-//       try {
-//         const response = await axios.get("http://localhost:3001/invitations", {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-//           },
-//         });
-//         setInvitations(response.data || []);
-//       } catch (error) {
-//         console.error("Error fetching invitations:", error);
-//         toast.error("Error fetching invitations");
-//       }
-//     };
-
-//     fetchInvitations();
-//   }, []);
-
-//   const handleAccept = async (invitationId) => {
-//     try {
-//       await axios.post(
-//         `http://localhost:3001/invitations/${invitationId}/accept`,
-//         {},
-//         {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-//           },
-//         }
-//       );
-//       setInvitations((prev) =>
-//         prev.filter((invitation) => invitation.id !== invitationId)
-//       );
-//       toast.success("Invitation accepted");
-//     } catch (error) {
-//       console.error("Error accepting invitation:", error);
-//       toast.error("Error accepting invitation");
-//     }
-//   };
-
-//   const handleDecline = async (invitationId) => {
-//     try {
-//       await axios.post(
-//         `http://localhost:3001/invitations/${invitationId}/decline`,
-//         {},
-//         {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-//           },
-//         }
-//       );
-//       setInvitations((prev) =>
-//         prev.filter((invitation) => invitation.id !== invitationId)
-//       );
-//       toast.success("Invitation declined");
-//     } catch (error) {
-//       console.error("Error declining invitation:", error);
-//       toast.error("Error declining invitation");
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h2>Invitations</h2>
-//       {invitations.length === 0 ? (
-//         <p>No invitations</p>
-//       ) : (
-//         invitations.map((invitation) => (
-//           <div key={invitation.id}>
-//             <p>{invitation.reminder.title}</p>
-//             <button onClick={() => handleAccept(invitation.id)}>Accept</button>
-//             <button onClick={() => handleDecline(invitation.id)}>Decline</button>
-//           </div>
-//         ))
-//       )}
-//       <ToastContainer />
-//     </div>
-//   );
-// };
-
-// export default Invitations;
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -96,14 +8,38 @@ const Invitations = ({ currentUser }) => {
   const [invitations, setInvitations] = useState([]);
 
   useEffect(() => {
+    const authToken = localStorage.getItem("authToken");
+
     const fetchInvitations = async () => {
       try {
         const response = await axios.get("http://localhost:3001/invitations", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
+          headers: { Authorization: `Bearer ${authToken}` },
         });
-        setInvitations(response.data || []);
+
+        console.log("Fetched Invitations:", response.data); // Log fetched data
+
+        // Process invitations to include sender and reminder details
+        const processedInvitations = response.data.map((invitation) => ({
+          id: invitation.id,
+          reminder: {
+            id: invitation.reminder?.id || null,
+            title: invitation.reminder?.title || "No title",
+            location: invitation.reminder?.location || "No location",
+            description: invitation.reminder?.description || "No description",
+            due_date: invitation.reminder?.due_date ? new Date(invitation.reminder.due_date).toLocaleString() : "No due date",
+          },
+          sender: {
+            id: invitation.sender?.id || null,
+            name: invitation.sender?.name || "Unknown",
+            email: invitation.sender?.email || "Unknown",
+          },
+          user_id: invitation.user_id,
+          status: invitation.status,
+          created_at: invitation.created_at,
+          updated_at: invitation.updated_at,
+        }));
+
+        setInvitations(processedInvitations);
       } catch (error) {
         console.error("Error fetching invitations:", error);
         toast.error("Error fetching invitations");
@@ -116,6 +52,8 @@ const Invitations = ({ currentUser }) => {
       { channel: "NotificationsChannel" },
       {
         received(data) {
+          // Handle real-time updates if needed
+          console.log("Received real-time data:", data);
           setInvitations((prev) => [...prev, data.invitation]);
           displayToastNotification(data.invitation);
         },
@@ -125,22 +63,41 @@ const Invitations = ({ currentUser }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []); // Empty dependency array ensures useEffect runs only on mount and unmount
+  }, []);
+  const displayToastNotification = (invitation) => {
+    toast.info(
+      <div className="toast-notification">
+        <p>{invitation.reminder.title}</p>
+        <div className="flex space-x-4">
+          <button
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded focus:outline-none"
+            onClick={() => handleAccept(invitation.id)}
+          >
+            Accept
+          </button>
+          <button
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded focus:outline-none"
+            onClick={() => handleDecline(invitation.id)}
+          >
+            Decline
+          </button>
+          <button
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none"
+            onClick={() => handleReschedule(invitation.id)}
+          >
+            Reschedule
+          </button>
+        </div>
+      </div>,
+      { position: "top-right", autoClose: false, closeOnClick: false }
+    );
+  };
+  
 
   const handleAccept = async (invitationId) => {
     try {
-      await axios.post(
-        `http://localhost:3001/invitations/${invitationId}/accept`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        }
-      );
-      setInvitations((prev) =>
-        prev.filter((invitation) => invitation.id !== invitationId)
-      );
+      await updateInvitationStatus(invitationId, "accept");
+      setInvitations((prev) => prev.filter((invitation) => invitation.id !== invitationId));
       toast.success("Invitation accepted");
     } catch (error) {
       console.error("Error accepting invitation:", error);
@@ -150,18 +107,8 @@ const Invitations = ({ currentUser }) => {
 
   const handleDecline = async (invitationId) => {
     try {
-      await axios.post(
-        `http://localhost:3001/invitations/${invitationId}/decline`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        }
-      );
-      setInvitations((prev) =>
-        prev.filter((invitation) => invitation.id !== invitationId)
-      );
+      await updateInvitationStatus(invitationId, "decline");
+      setInvitations((prev) => prev.filter((invitation) => invitation.id !== invitationId));
       toast.success("Invitation declined");
     } catch (error) {
       console.error("Error declining invitation:", error);
@@ -170,44 +117,98 @@ const Invitations = ({ currentUser }) => {
   };
 
   const handleReschedule = async (invitationId) => {
-    // Implement reschedule logic here
     toast.info("Reschedule functionality not yet implemented");
+    // Implement reschedule logic here
   };
 
-  const displayToastNotification = (invitation) => {
-    toast.info(
-      <div>
-        <p>{invitation.reminder.title}</p>
-        <button onClick={() => handleAccept(invitation.id)}>Accept</button>
-        <button onClick={() => handleDecline(invitation.id)}>Decline</button>
-        <button onClick={() => handleReschedule(invitation.id)}>Reschedule</button>
-      </div>,
-      {
-        position: "top-right",
-        autoClose: false,
-        closeOnClick: false,
-      }
-    );
+  const updateInvitationStatus = async (invitationId, action) => {
+    const authToken = localStorage.getItem("authToken");
+
+    try {
+      await axios.post(
+        `http://localhost:3001/invitations/${invitationId}/${action}`,
+        {},
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+    } catch (error) {
+      throw new Error(`Error ${action}ing invitation: ${error.message}`);
+    }
   };
+
+  // const displayToastNotification = (invitation) => {
+  //   toast.info(
+  //     <div className="toast-notification">
+  //       <p>{invitation.reminder.title}</p>
+  //       <div className="flex space-x-4">
+  //         <button
+  //           className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded focus:outline-none"
+  //           onClick={() => handleAccept(invitation.id)}
+  //         >
+  //           Accept
+  //         </button>
+  //         <button
+  //           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded focus:outline-none"
+  //           onClick={() => handleDecline(invitation.id)}
+  //         >
+  //           Decline
+  //         </button>
+  //         <button
+  //           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none"
+  //           onClick={() => handleReschedule(invitation.id)}
+  //         >
+  //           Reschedule
+  //         </button>
+  //       </div>
+  //     </div>,
+  //     { position: "top-right", autoClose: false, closeOnClick: false }
+  //   );
+  // };
 
   return (
-    <div>
-      <h2>Invitations</h2>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h2 className="text-2xl font-bold mb-4">Invitations</h2>
       {invitations.length === 0 ? (
-        <p>No invitations</p>
+        <p className="text-gray-600">No invitations</p>
       ) : (
         invitations.map((invitation) => (
-          <div key={invitation.id}>
-            <p>{invitation.reminder.title}</p>
-            <button onClick={() => handleAccept(invitation.id)}>Accept</button>
-            <button onClick={() => handleDecline(invitation.id)}>Decline</button>
-            <button onClick={() => handleReschedule(invitation.id)}>Reschedule</button>
+          <div key={invitation.id} className="bg-white shadow-sm rounded-md p-4 mb-4">
+            <div className="mb-4">
+              <p className="text-lg font-semibold">From: {invitation.sender.name}</p>
+              <p className="text-sm text-gray-500">Email: {invitation.sender.email}</p>
+            </div>
+            <div className="mb-4">
+              <p className="text-lg font-semibold">Title: {invitation.reminder.title}</p>
+              <p className="text-sm text-gray-500">Location: {invitation.reminder.location}</p>
+              <p className="text-sm text-gray-500">Description: {invitation.reminder.description}</p>
+              <p className="text-sm text-gray-500">Due Date: {invitation.reminder.due_date}</p>
+            </div>
+            <div className="flex space-x-4">
+              <button
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded focus:outline-none"
+                onClick={() => handleAccept(invitation.id)}
+              >
+                Accept
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded focus:outline-none"
+                onClick={() => handleDecline(invitation.id)}
+              >
+                Decline
+              </button>
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none"
+                onClick={() => handleReschedule(invitation.id)}
+              >
+                Reschedule
+              </button>
+            </div>
           </div>
         ))
       )}
       <ToastContainer />
     </div>
   );
+  
 };
 
 export default Invitations;

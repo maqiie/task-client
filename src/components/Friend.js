@@ -614,17 +614,44 @@ const FriendSearch = () => {
         `http://localhost:3001/friend_requests/${userId}/accepted`,
         {
           headers: {
-            Authorization: `Bearer ${authToken}`,
+            Authorization: `Bearer ${authToken}`, // Make sure authToken is defined
           },
         }
       );
       const data = await response.json();
+      console.log("Received data:", data); // Add this console log to see the data received
       setAcceptedRequests(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching accepted requests:", error);
       setAcceptedRequests([]);
     }
   };
+  
+ 
+  // const fetchAcceptedRequests = async (userId) => {
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:3001/friend_requests/${userId}/accepted`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${authToken}`, // Make sure authToken is defined
+  //         },
+  //       }
+  //     );
+  //     const data = await response.json();
+  //     setAcceptedRequests(Array.isArray(data) ? data : []);
+  
+  //     // Logging accepted users and their relationship categories
+  //     console.log("Accepted Requests:", data);
+  //   } catch (error) {
+  //     console.error("Error fetching accepted requests:", error);
+  //     setAcceptedRequests([]);
+  //   }
+  // };
+  useEffect(() => {
+    fetchAcceptedRequests(userId);
+  }, [userId]); // Fetch data whenever userId changes
+
 
   const isFriend = (userId) => {
     return acceptedRequests.some(
@@ -1014,61 +1041,62 @@ const FriendSearch = () => {
         <SentFriendRequests sentRequests={sentRequests} />
       </div>
       <div className="accepted-friends-box">
-        <h2 className="text-lg font-semibold mb-3 text-indigo-700">
-          Accepted Friends
-        </h2>
-        {acceptedRequests.length === 0 ? (
-          <p className="text-gray-500">No accepted friends</p>
-        ) : (
-          acceptedRequests.map((request) => (
-            <div key={request.id} className="border-b border-gray-300 py-3">
-              <div className="flex flex-col sm:flex-row items-center justify-between">
-                <div className="flex items-center mb-2 sm:mb-0">
-                  <div className="bg-gray-200 rounded-full h-12 w-12 flex items-center justify-center mr-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-gray-600"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 9v3m0 0v3m0-3h3m-3 0H9m-7 8a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-700">
-                      Friend: {request.sender.name}
-                    </span>
-                    <br />
-                    <span className="text-gray-600">
-                      Email: {request.sender.email}
-                    </span>
-                  </div>
+      <h2 className="text-lg font-semibold mb-3 text-indigo-700">
+        Accepted Friends
+      </h2>
+      {acceptedRequests.length === 0 ? (
+        <p className="text-gray-500">No accepted friends</p>
+      ) : (
+        acceptedRequests.map((request) => (
+          <div key={request.id} className="border-b border-gray-300 py-3">
+            <div className="flex flex-col sm:flex-row items-center justify-between">
+              <div className="flex items-center mb-2 sm:mb-0">
+                <div className="bg-gray-200 rounded-full h-12 w-12 flex items-center justify-center mr-4">
+                  {/* You can customize the avatar/icon here */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 9v3m0 0v3m0-3h3m-3 0H9m-7 8a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z"
+                    />
+                  </svg>
                 </div>
-                <span className="text-gray-500">
-                  Relationship: {request.relationship_category}
-                </span>
+                <div>
+                  <span className="font-semibold text-gray-700">
+                    Friend: {request.name || 'Unknown'}
+                  </span>
+                  <br />
+                  <span className="text-gray-600">
+                    Email: {request.email || 'Unknown'}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-end mt-2">
-                {request.relationship_category === "friend" && (
-                  <span className="text-green-500 mr-2">Friend</span>
-                )}
-                {request.relationship_category === "family" && (
-                  <span className="text-blue-500 mr-2">Family</span>
-                )}
-                {request.relationship_category === "colleague" && (
-                  <span className="text-purple-500 mr-2">Colleague</span>
-                )}
-              </div>
+              <span className="text-gray-500">
+                Relationship: {request.relationship || 'Unknown'}
+              </span>
             </div>
-          ))
-        )}
-      </div>
+            <div className="flex justify-end mt-2">
+              {request.relationship === "friend" && (
+                <span className="text-green-500 mr-2">Friend</span>
+              )}
+              {request.relationship === "family" && (
+                <span className="text-blue-500 mr-2">Family</span>
+              )}
+              {request.relationship === "colleague" && (
+                <span className="text-purple-500 mr-2">Colleague</span>
+              )}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
     </div>
   );
 };

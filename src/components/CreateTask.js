@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import debounce from "lodash.debounce";
 import consumer from "../cable"; // Ensure this path is correct for Action Cable consumer setup
-import './createTask.css';
+import "./createTask.css";
 import Loader from "./Loader";
 
-const CreateTask = () => {
+const CreateTask = ({ userId }) => {
+  // Assuming userId is passed as a prop
   const [loading, setLoading] = useState(false);
   const [taskName, setTaskName] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -27,8 +27,7 @@ const CreateTask = () => {
   const [suggestAddFriend, setSuggestAddFriend] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isBlurred, setIsBlurred] = useState(false);
-
-
+  const [acceptedFriends, setAcceptedFriends] = useState([]);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -53,43 +52,46 @@ const CreateTask = () => {
     }
   }, [dueDate]);
 
+  
   useEffect(() => {
-    // Simulating acceptedUsers fetching for demonstration
-    const fetchAcceptedUsers = async () => {
+    const fetchAcceptedFriends = async () => {
       try {
         const authToken = localStorage.getItem("authToken");
-        const response = await axios.get("http://localhost:3001/friend_requests/${userId}/accepted", {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
-        setAcceptedUsers(response.data);
+        const response = await axios.get(
+          `http://localhost:3001/friend_requests/${userId}/accepted`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+        setAcceptedFriends(response.data); // Assuming response.data is an array of objects with id, name, and email
       } catch (error) {
-        console.error("Error fetching accepted users:", error);
+        console.error("Error fetching accepted friends:", error);
       }
     };
-
-    fetchAcceptedUsers();
+  
+    fetchAcceptedFriends();
   }, []);
+  
 
   const handleSearch = debounce(async (searchTerm) => {
     try {
       setSearchTerm(searchTerm.trim().toLowerCase());
       setLoading(true);
   
-      if (!searchTerm || !acceptedUsers) {
+      if (!searchTerm || acceptedFriends.length === 0) {
         setFilteredUsers([]);
         setLoading(false);
         return;
       }
   
-      const filtered = acceptedUsers.filter((user) => {
-        const senderName = user.sender.name ? user.sender.name.toLowerCase() : "";
-        const senderEmail = user.sender.email ? user.sender.email.toLowerCase() : "";
+      const filtered = acceptedFriends.filter((friend) => {
+        const friendName = friend.name.toLowerCase();
+        const friendEmail = friend.email.toLowerCase();
   
         return (
-          senderName.includes(searchTerm) ||
-          senderEmail.includes(searchTerm)
+          friendName.includes(searchTerm) || friendEmail.includes(searchTerm)
         );
       });
   
@@ -101,226 +103,72 @@ const CreateTask = () => {
     }
   }, 300);
   
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-
-  //   try {
-  //     // Validate task creation fields (if needed)
-
-  //     // Prepare task payload
-  //     const authToken = localStorage.getItem("authToken");
-  //     const dueDateTime = `${dueDate}T${dueTime}:00`;
-  //     const dueDateTimeISO = new Date(dueDateTime).toISOString();
-  //     const taskDurationMinutes = getTaskDurationMinutes(duration);
-
-  //     const taskPayload = {
-  //       reminder: {
-  //         title: taskName,
-  //         due_date: dueDateTimeISO,
-  //         priority: priority,
-  //         location: location,
-  //         description: details,
-  //         duration: taskDurationMinutes,
-  //       },
-  //     };
-
-  //     // Send task creation request
-  //     const response = await axios.post(
-  //       "http://localhost:3001/reminders",
-  //       taskPayload,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${authToken}`,
-  //         },
-  //       }
-  //     );
-
-  //     // If users are selected, create invitations
-  //     if (selectedUsers.length > 0) {
-  //       const invitationPromises = selectedUsers.map(user => {
-  //         const invitationPayload = {
-  //           invitation: {
-  //             user_id: user.id,
-  //             reminder_id: response.data.reminder.id,
-  //             status: 'pending',
-  //           },
-  //         };
-
-  //         return axios.post(
-  //           "http://localhost:3001/invitations",
-  //           invitationPayload,
-  //           {
-  //             headers: {
-  //               Authorization: `Bearer ${authToken}`,
-  //             },
-  //           }
-  //         );
-  //       });
-
-  //       await Promise.all(invitationPromises);
-
-  //       console.log("Invitations created successfully");
-  //     }
-
-  //     // Reset form fields and state after successful submission
-  //     setTaskName("");
-  //     setDueDate("");
-  //     setDueTime("");
-  //     setPriority("");
-  //     setLocation("");
-  //     setDetails("");
-  //     setDuration("");
-  //     setError(null);
-  //     setConflict(null);
-  //     setAlternativeTime(null);
-  //     setTasks([...tasks, response.data.reminder]); // Assuming tasks state is an array of reminders
-  //     setSuccessMessage("Task created successfully!");
-  //     setSelectedUsers([]);
-
-  //     // Clear success message after a delay
-  //     setTimeout(() => setSuccessMessage(null), 3000);
-  //   } catch (error) {
-  //     console.error("Error submitting task:", error);
-  //     if (error.response) {
-  //       console.error("Response data:", error.response.data);
-  //     }
-  //     setError("Error submitting task. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  
-  //   try {
-  //     // Prepare task payload
-  //     const authToken = localStorage.getItem("authToken");
-  //     const dueDateTime = `${dueDate}T${dueTime}:00`;
-  //     const dueDateTimeISO = new Date(dueDateTime).toISOString();
-  //     const taskDurationMinutes = getTaskDurationMinutes(duration);
-  
-  //     const taskPayload = {
-  //       reminder: {
-  //         title: taskName,
-  //         due_date: dueDateTimeISO,
-  //         priority: priority,
-  //         location: location,
-  //         description: details,
-  //         duration: taskDurationMinutes,
-  //         user_ids: selectedUsers.map(user => user.id) // Include selected user ids
-  //       },
-  //     };
-  
-  //     // Send task creation request
-  //     const response = await axios.post(
-  //       "http://localhost:3001/reminders",
-  //       taskPayload,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${authToken}`,
-  //         },
-  //       }
-  //     );
-  
-  //     // If users are selected, create invitations (if needed)
-  
-  //     // Reset form fields and state after successful submission
-  //     setTaskName("");
-  //     setDueDate("");
-  //     setDueTime("");
-  //     setPriority("");
-  //     setLocation("");
-  //     setDetails("");
-  //     setDuration("");
-  //     setError(null);
-  //     setConflict(null);
-  //     setAlternativeTime(null);
-  //     setTasks([...tasks, response.data.reminder]); // Assuming tasks state is an array of reminders
-  //     setSuccessMessage("Task created successfully!");
-  //     setSelectedUsers([]);
-  
-  //     // Clear success message after a delay
-  //     setTimeout(() => setSuccessMessage(null), 3000);
-  //   } catch (error) {
-  //     console.error("Error submitting task:", error);
-  //     if (error.response) {
-  //       console.error("Response data:", error.response.data);
-  //     }
-  //     setError("Error submitting task. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  console.log("Setting loading state to true");
+    e.preventDefault();
+    setIsLoading(true);
+    console.log("Setting loading state to true");
 
-  try {
-    // Prepare task payload
-    const authToken = localStorage.getItem("authToken");
-    const dueDateTime = `${dueDate}T${dueTime}:00`;
-    const dueDateTimeISO = new Date(dueDateTime).toISOString();
-    const taskDurationMinutes = getTaskDurationMinutes(duration);
+    try {
+      // Prepare task payload
+      const authToken = localStorage.getItem("authToken");
+      const dueDateTime = `${dueDate}T${dueTime}:00`;
+      const dueDateTimeISO = new Date(dueDateTime).toISOString();
+      const taskDurationMinutes = getTaskDurationMinutes(duration);
 
-    const taskPayload = {
-      reminder: {
-        title: taskName,
-        due_date: dueDateTimeISO,
-        priority: priority,
-        location: location,
-        description: details,
-        duration: taskDurationMinutes,
-        user_ids: selectedUsers.map(user => user.id) // Include selected user ids
-      },
-    };
-
-    // Send task creation request
-    const response = await axios.post(
-      "http://localhost:3001/reminders",
-      taskPayload,
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
+      const taskPayload = {
+        reminder: {
+          title: taskName,
+          due_date: dueDateTimeISO,
+          priority: priority,
+          location: location,
+          description: details,
+          duration: taskDurationMinutes,
+          user_ids: selectedUsers.map((user) => user.id), // Include selected user ids
         },
+      };
+
+      // Send task creation request
+      const response = await axios.post(
+        "http://localhost:3001/reminders",
+        taskPayload,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      console.log("API response:", response.data); // Log the API response data
+
+      // If users are selected, create invitations (if needed)
+
+      // Reset form fields and state after successful submission
+      setTaskName("");
+      setDueDate("");
+      setDueTime("");
+      setPriority("");
+      setLocation("");
+      setDetails("");
+      setDuration("");
+      setError(null);
+      setConflict(null);
+      setAlternativeTime(null);
+      setTasks([...tasks, response.data.reminder]); // Assuming tasks state is an array of reminders
+      setSuccessMessage("Task created successfully!");
+      setSelectedUsers([]);
+
+      // Clear success message after a delay
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error("Error submitting task:", error);
+      if (error.response) {
+        console.error("Response data:", error.response.data);
       }
-    );
-    console.log("API response:", response.data); // Log the API response data
-
-    // If users are selected, create invitations (if needed)
-
-    // Reset form fields and state after successful submission
-    setTaskName("");
-    setDueDate("");
-    setDueTime("");
-    setPriority("");
-    setLocation("");
-    setDetails("");
-    setDuration("");
-    setError(null);
-    setConflict(null);
-    setAlternativeTime(null);
-    setTasks([...tasks, response.data.reminder]); // Assuming tasks state is an array of reminders
-    setSuccessMessage("Task created successfully!");
-    setSelectedUsers([]);
-
-    // Clear success message after a delay
-    setTimeout(() => setSuccessMessage(null), 3000);
-  } catch (error) {
-    console.error("Error submitting task:", error);
-    if (error.response) {
-      console.error("Response data:", error.response.data);
+      setError("Error submitting task. Please try again.");
+    } finally {
+      setIsLoading(false);
+      console.log("Setting loading state to false");
     }
-    setError("Error submitting task. Please try again.");
-  } finally {
-    setIsLoading(false);
-    console.log("Setting loading state to false");
-  }
-};
-
-  
+  };
 
   const getTaskDurationMinutes = (duration) => {
     return {
@@ -423,66 +271,127 @@ const CreateTask = () => {
     setAlternativeTime(suggestAlternativeTime());
   }, [conflict, duration]);
 
+  // const handleUserSelect = (user) => {
+  //   setSelectedUsers((prevSelectedUsers) => {
+  //     const isAlreadySelected = prevSelectedUsers.some(
+  //       (selectedUser) => selectedUser.id === user.id
+  //     );
+  
+  //     if (isAlreadySelected) {
+  //       return prevSelectedUsers.filter(
+  //         (selectedUser) => selectedUser.id !== user.id
+  //       );
+  //     } else {
+  //       return [...prevSelectedUsers, user];
+  //     }
+  //   });
+  // };
   const handleUserSelect = (user) => {
-    setSelectedUsers(prevSelectedUsers => {
-      const isAlreadySelected = prevSelectedUsers.some(selectedUser => selectedUser.id === user.id);
-
+    setSelectedUsers((prevSelectedUsers) => {
+      const isAlreadySelected = prevSelectedUsers.some(
+        (selectedUser) => selectedUser.id === user.id
+      );
+  
       if (isAlreadySelected) {
-        return prevSelectedUsers.filter(selectedUser => selectedUser.id !== user.id);
+        return prevSelectedUsers.filter(
+          (selectedUser) => selectedUser.id !== user.id
+        );
       } else {
-        return [...prevSelectedUsers, user];
+        // Ensure `user` object contains `sender` property with `name` and `email`
+        const updatedUser = {
+          id: user.id,
+          sender: {
+            name: user.name, // Assuming `user` object structure has `name` and `email`
+            email: user.email,
+          },
+        };
+  
+        return [...prevSelectedUsers, updatedUser];
       }
     });
   };
-
+  
+  
+  // const renderSelectedUsers = () => {
+  //   return (
+  //     <ul className="selected-users-list">
+  //       {selectedUsers.map((user) => (
+  //         <li key={user.id} className="selected-user-item">
+  //           {user.sender?.name} ({user.sender?.email})
+  //           <button onClick={() => handleUserSelect(user)}>Remove</button>
+  //         </li>
+  //       ))}
+  //     </ul>
+  //   );
+  // };
   const renderSelectedUsers = () => {
     return (
       <ul className="selected-users-list">
-        {selectedUsers.map(user => (
+        {selectedUsers.map((user) => (
           <li key={user.id} className="selected-user-item">
-            {user.sender.name} ({user.sender.email})
+            {user.sender?.name} ({user.sender?.email})
             <button onClick={() => handleUserSelect(user)}>Remove</button>
           </li>
         ))}
       </ul>
     );
   };
-
+  
+  
   const renderFilteredUsers = () => {
     return (
       <ul className="filtered-users-list">
-        {filteredUsers.map(user => (
-          <li key={user.id} onClick={() => handleUserSelect(user)}>
-            {user.sender.name} ({user.sender.email})
+        {filteredUsers.map((friend) => (
+          <li key={friend.id} onClick={() => handleUserSelect(friend)}>
+            {friend.name} ({friend.email})
           </li>
         ))}
       </ul>
     );
   };
+  
 
   return (
-        <div className=" create-task-container bg-gradient-to-r from-purple-300 to-indigo-400  shadow-md p-6 max-w-md mx-auto border border-gray-300">
-
-    {/* // <div className="create-task-container"> */}
+    <div className=" create-task-container bg-gradient-to-r from-purple-300 to-indigo-400  shadow-md p-6 max-w-md mx-auto border border-gray-300">
+      {/* // <div className="create-task-container"> */}
       <h2>Create Task</h2>
       {error && <div className="error">{error}</div>}
       {successMessage && <div className="success">{successMessage}</div>}
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="taskName">Task Name:</label>
-          <input type="text" id="taskName" value={taskName} onChange={handleTaskNameChange} />
+          <input
+            type="text"
+            id="taskName"
+            value={taskName}
+            onChange={handleTaskNameChange}
+          />
         </div>
         <div>
           <label htmlFor="dueDate">Due Date:</label>
-          <input type="date" id="dueDate" value={dueDate} onChange={handleDueDateChange} />
+          <input
+            type="date"
+            id="dueDate"
+            value={dueDate}
+            onChange={handleDueDateChange}
+          />
         </div>
         <div>
           <label htmlFor="dueTime">Due Time:</label>
-          <input type="time" id="dueTime" value={dueTime} onChange={handleDueTimeChange} />
+          <input
+            type="time"
+            id="dueTime"
+            value={dueTime}
+            onChange={handleDueTimeChange}
+          />
         </div>
         <div>
           <label htmlFor="priority">Priority:</label>
-          <select id="priority" value={priority} onChange={handlePriorityChange}>
+          <select
+            id="priority"
+            value={priority}
+            onChange={handlePriorityChange}
+          >
             <option value="">Select priority</option>
             <option value="low">Low</option>
             <option value="medium">Medium</option>
@@ -491,15 +400,28 @@ const CreateTask = () => {
         </div>
         <div>
           <label htmlFor="location">Location:</label>
-          <input type="text" id="location" value={location} onChange={handleLocationChange} />
+          <input
+            type="text"
+            id="location"
+            value={location}
+            onChange={handleLocationChange}
+          />
         </div>
         <div>
           <label htmlFor="details">Details:</label>
-          <textarea id="details" value={details} onChange={handleDetailsChange}></textarea>
+          <textarea
+            id="details"
+            value={details}
+            onChange={handleDetailsChange}
+          ></textarea>
         </div>
         <div>
           <label htmlFor="duration">Duration:</label>
-          <select id="duration" value={duration} onChange={handleDurationChange}>
+          <select
+            id="duration"
+            value={duration}
+            onChange={handleDurationChange}
+          >
             <option value="">Select duration</option>
             <option value="0-30 minutes">0-30 minutes</option>
             <option value="1 hour">1 hour</option>
@@ -510,7 +432,12 @@ const CreateTask = () => {
         </div>
         <div>
           <label htmlFor="search">Invite Users:</label>
-          <input type="text" id="search" value={searchTerm} onChange={handleChange} />
+          <input
+            type="text"
+            id="search"
+            value={searchTerm}
+            onChange={handleChange}
+          />
           {loading && <div>Loading...</div>}
           {renderFilteredUsers()}
         </div>
@@ -521,16 +448,17 @@ const CreateTask = () => {
       </form>
       {conflict && (
         <div className="conflict">
-          <strong>Conflict with existing task:</strong> {conflict.title} (Duration: {conflict.duration} minutes)
+          <strong>Conflict with existing task:</strong> {conflict.title}{" "}
+          (Duration: {conflict.duration} minutes)
           {alternativeTime && (
             <div>
-              <strong>Suggested Alternative Time:</strong> {alternativeTime.toLocaleTimeString()}
+              <strong>Suggested Alternative Time:</strong>{" "}
+              {alternativeTime.toLocaleTimeString()}
             </div>
           )}
         </div>
       )}
-            {isLoading && <Loader />}
-
+      {isLoading && <Loader />}
     </div>
   );
 };
