@@ -15,6 +15,8 @@ import Footer from "./components/Footer";
 import FriendSearch from "./components/Friend";
 import Invitations from "./components/Invitations";
 import Loader from "./components/Loader";
+import { ActionCableProvider } from '@thrash-industries/react-actioncable-provider';
+
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -68,6 +70,8 @@ function App() {
   };
 
   return (
+    <ActionCableProvider url="ws://localhost:3001/cable">
+
     <Router>
       <Navbar currentUser={currentUser} onLogout={handleLogout} />
       <Notification currentUser={currentUser} /> {/* Pass currentUser here */}
@@ -84,8 +88,10 @@ function App() {
         <Route path="/invitations" element={<Invitations userData={currentUser}/>}/>
         <Route path="/loader" element={<Loader/> }/>
       </Routes>
-      <Footer/>
+      {/* <Footer/> */}
     </Router>
+    </ActionCableProvider>
+
   );
 }
 
