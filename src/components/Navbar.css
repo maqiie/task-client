@@ -1,0 +1,48 @@
+/* Add this CSS to your global styles or component stylesheet */
+
+/* Icon styling */
+.navbar-icon {
+    width: 2.5rem; /* Adjust size as needed */
+    height: 2.5rem; /* Adjust size as needed */
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  /* Tooltip styling */
+  .tooltip {
+    position: absolute;
+    bottom: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+  }
+  
+  /* Tooltip arrow */
+  .tooltip:before {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0.25rem;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.75) transparent transparent transparent;
+  }
+  
+  /* Show tooltip on hover */
+  .navbar-icon:hover .tooltip,
+  .navbar-icon[data-tooltip-shown="true"] .tooltip {
+    opacity: 1;
+  }
+  
+  /* Adjust tooltip position for group hover */
+  .navbar-icon.group:hover .tooltip {
+    bottom: calc(100% + 1rem);
+  }
+  

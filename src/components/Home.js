@@ -5,6 +5,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import axios from "axios";
 import "./Home.css";
+import { UserCircleIcon } from '@heroicons/react/outline'; // Importing the UserCircleIcon from Heroicons
 
 const Home = ({ currentUser }) => {
   const [selectedTask, setSelectedTask] = useState(null);
@@ -324,6 +325,25 @@ const Home = ({ currentUser }) => {
 
   return (
     <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
+
+
+<nav className="fixed top-0 left-0 right-0 z-50 mb-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-end h-16 items-center">
+            <Link to="/profile" className="flex items-center">
+              {currentUser && currentUser.profilePicture ? (
+                <img
+                  src={currentUser.profilePicture}
+                  alt="User Profile"
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : (
+                <UserCircleIcon className="h-8 w-8 text-gray-500 hover:text-gray-700 transition duration-150 ease-in-out transform hover:scale-110" />
+              )}
+            </Link>
+          </div>
+        </div>
+      </nav>
       <div className="w-full px-4 py-8 bg-white rounded-lg shadow-lg mb-8">
         {currentTask ? (
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 md:p-4 shadow-lg border border-gray-300 border-solid">

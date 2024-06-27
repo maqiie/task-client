@@ -77,7 +77,7 @@ function App() {
       <Notification currentUser={currentUser} /> {/* Pass currentUser here */}
 
       <Routes>
-        <Route path="/" element={<Home currentUser={currentUser} />} />
+        <Route  path="/" element={<Home currentUser={currentUser} />} />
         <Route path="/create/*" element={currentUser ? <CreateTask /> : <Navigate to="/login" />} />
         <Route path="/calendar/*" element={<Calendar />} />
         <Route path="/login/*" element={<Login />} />
