@@ -83,12 +83,12 @@ function App() {
         <Route path="/login/*" element={<Login />} />
         <Route path="/tasks" element={currentUser ? <Task /> : <Navigate to="/login" />} />
         <Route path="/special" element={<SpecialEvents />} />
-        <Route path="/profile" element={<UserProfile userData={currentUser} />} />
+        <Route path="/profile" element={<UserProfile userData={currentUser} onLogout={handleLogout} />} />
         <Route path="/friend" element={<FriendSearch userData={currentUser}/>} />
         <Route path="/invitations" element={<Invitations userData={currentUser}/>}/>
         <Route path="/loader" element={<Loader/> }/>
       </Routes>
-      {/* <Footer/> */}
+      <Footer/>
     </Router>
     </ActionCableProvider>
 
