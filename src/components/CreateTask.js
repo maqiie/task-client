@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import debounce from "lodash.debounce";
-import consumer from "../cable"; // Ensure this path is correct for Action Cable consumer setup
+import actionCableConsumer from '../actionCableConsumer';
 import "./createTask.css";
 import Loader from "./Loader";
 
